@@ -1,6 +1,3 @@
-from wx.lib.evtmgr import MessageAdapter
-
-
 class Message:
     pass
 
