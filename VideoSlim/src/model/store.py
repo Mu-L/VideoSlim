@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 import json
+import logging
+from abc import ABC, abstractmethod
 
 
 class IStore(ABC):
@@ -94,8 +95,12 @@ class JSONStore(IPersistentStore):
         """
         self.data = {}
 
-        with open(self.file_path, "r") as f:
-            self.data = json.load(f)
+        try:
+            with open(self.file_path, "r") as f:
+                self.data = json.load(f)
+        except FileNotFoundError:
+            logging.error(f"Error loading config file: {self.file_path} not found")
+            self.data = {}
 
     def get(self, key: str, default: str = "") -> str:
         return self.data.get(key, default)

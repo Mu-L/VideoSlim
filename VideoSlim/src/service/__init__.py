@@ -6,11 +6,11 @@ VideoSlim - 服务模块
 
 import logging
 
-from .config import ConfigService
-from .message import MessageService
-from .store import StoreService
-from .updater import UpdateService
-from .video import VideoService
+from src.service.config import ConfigService
+from src.service.message import MessageService
+from src.service.store import StoreService
+from src.service.updater import UpdateService
+from src.service.video import VideoService
 
 
 def init_services():
@@ -29,3 +29,4 @@ def init_services():
     message_service = MessageService.get_instance()
     update_service = UpdateService.get_instance()
     store_service = StoreService.get_instance()
+    video_service = VideoService.get_instance()

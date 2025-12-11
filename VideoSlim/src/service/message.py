@@ -1,7 +1,7 @@
 from queue import Queue
 from typing import Optional
 
-from model.message import IMessage
+from src.model.message import IMessage
 
 
 class MessageService:

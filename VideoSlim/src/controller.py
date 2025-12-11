@@ -1,8 +1,8 @@
 import threading
 
-from model.video import Task, TaskInfo
-from service.updater import UpdateService
-from service.video import VideoService
+from src.model.video import Task, TaskInfo
+from src.service.updater import UpdateService
+from src.service.video import VideoService
 
 
 class Controller:

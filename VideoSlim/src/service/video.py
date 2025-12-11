@@ -3,17 +3,17 @@ import os
 import subprocess
 from typing import Optional
 
-import meta
-from model.message import (
+from src import meta
+from src.model.message import (
     CompressionErrorMessage,
     CompressionFinishedMessage,
     CompressionProgressMessage,
     CompressionStartMessage,
 )
-from model.video import Task, VideoFile
+from src.model.video import Task, VideoFile
 from pymediainfo import MediaInfo
-from service.config import ConfigService
-from service.message import MessageService
+from src.service.config import ConfigService
+from src.service.message import MessageService
 
 
 class VideoService:

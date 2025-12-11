@@ -3,6 +3,3 @@ VideoSlim - 视频压缩工具包
 
 提供视频压缩的核心功能，包括控制器、视图和配置管理。
 """
-from .config import *
-from .controller import *
-from .view import *

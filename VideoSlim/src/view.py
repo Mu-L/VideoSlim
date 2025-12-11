@@ -6,12 +6,12 @@ import webbrowser
 from queue import Queue
 from tkinter import END, NE, TOP, BooleanVar, StringVar, W, messagebox
 
-import meta
+from src import meta
 import windnd
-from model import message
-from service.message import MessageService
+from src.model import message
+from src.service.message import MessageService
 
-from .controller import Controller
+from src.controller import Controller
 
 
 class View:

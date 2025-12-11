@@ -2,10 +2,10 @@ import logging
 import os
 from enum import Enum
 
-import meta
+from .. import meta
 from pydantic import BaseModel
 
-from src.utils import scan_directory
+from ..utils import scan_directory
 
 
 class VideoFile:

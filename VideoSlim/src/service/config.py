@@ -1,25 +1,29 @@
 import json
+import logging
 from typing import Optional
 
-import meta
-from model.config import ConfigModel, ConfigsModel
+from src import meta
+from src.model.config import ConfigModel, ConfigsModel
+from src.model.message import ConfigLoadMessage
+from src.service.message import MessageService
 
 
 class ConfigService:
     """
     配置服务类，用于管理应用程序的配置信息
-    
+
     该类采用单例模式实现，确保应用程序中只有一个配置服务实例。
     它负责从配置文件加载配置，并提供访问配置的方法。
     """
+
     _instance: Optional["ConfigService"] = None
 
     def __init__(self) -> None:
         """
         初始化配置服务实例
-        
+
         从配置文件加载配置数据，并使用ConfigModel解析配置。
-        
+
         Raises:
             ValueError: 当尝试创建多个ConfigService实例时抛出
             FileNotFoundError: 当配置文件不存在时抛出
@@ -30,10 +34,19 @@ class ConfigService:
 
         config_file_path = meta.CONFIG_FILE_PATH
 
-        with open(config_file_path, "r") as f:
-            configs = json.load(f)
+        try:
+            with open(config_file_path, "r", encoding="utf-8") as f:
+                configs = json.load(f)
 
-        self.configs_model = ConfigsModel(*configs)
+            self.configs_model = ConfigsModel(*configs)
+        except (TypeError, FileNotFoundError, ValueError) as e:
+            logging.error(f"Error loading config file: {e}")
+            # 重新生成默认配置
+            self.configs_model = ConfigsModel()
+
+        # 发送配置加载消息
+        config_names = self.get_config_name_list()
+        MessageService.get_instance().send_message(ConfigLoadMessage(config_names))
 
     @staticmethod
     def get_instance() -> "ConfigService":
@@ -42,7 +55,7 @@ class ConfigService:
 
         Returns:
             ConfigService: 配置服务的单例实例
-            
+
         该方法采用懒加载模式，只有在第一次调用时才会创建ConfigService实例。
         """
         if ConfigService._instance is None:
