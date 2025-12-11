@@ -22,7 +22,7 @@ def setup_logging():
     logging.basicConfig(
         level=logging.INFO,
         filename="log.txt",
-        filemode="w",
+        filemode="a+",
         format="%(asctime)s - %(levelname)s - %(message)s",
         encoding="utf-8",
     )

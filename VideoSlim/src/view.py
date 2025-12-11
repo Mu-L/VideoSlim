@@ -38,7 +38,7 @@ class View:
         self._setup_ui()
 
         # Setup message queue checking
-        self.root.after(1000, self._check_message_queue)
+        self.root.after(50, self._check_message_queue)
 
     def _setup_ui(self):
         """
