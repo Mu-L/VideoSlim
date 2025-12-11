@@ -6,19 +6,11 @@ Refactored version: v1.8
 """
 
 import logging
-
 import tkinter as tk
 
 from src.controller import Controller
+from src.service import init_services
 from src.view import View
-
-# Constants
-META_INFO = {
-    "VERSION": "v1.8",
-    "VIDEO_EXTENSIONS": [".mp4", ".mkv", ".mov", ".avi"],
-    "CONFIG_FILE": "config.json",
-    "TEMP_FILES": ["./pre_temp.mp4", "./old_atemp.wav", "./old_atemp.mp4", "./old_vtemp.mp4"]
-}
 
 
 def setup_logging():
@@ -29,20 +21,22 @@ def setup_logging():
     """
     logging.basicConfig(
         level=logging.INFO,
-        filename='log.txt',
-        filemode='w',
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        encoding='utf-8'
+        filename="log.txt",
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        encoding="utf-8",
     )
 
 
 def main():
     setup_logging()
 
+    init_services()
+
     root = tk.Tk()
-    app = View(root, Controller(META_INFO))
+    app = View(root, Controller())
     root.mainloop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

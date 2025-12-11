@@ -1,51 +1,54 @@
-class Message:
+from abc import ABC
+
+
+class IMessage(ABC):
     pass
 
 
-class WarningMessage(Message):
+class WarningMessage(IMessage):
     def __init__(self, title: str, message: str):
         self.title = title
         self.message = message
 
 
-class UpdateMessage(Message):
+class UpdateMessage(IMessage):
     def __init__(self):
         pass
 
 
-class ErrorMessage(Message):
+class ErrorMessage(IMessage):
     def __init__(self, title: str, message: str):
         self.title = title
         self.message = message
 
 
-class ExitMessage(Message):
+class ExitMessage(IMessage):
     def __init__(self):
         pass
 
 
-class ConfigLoadMessage(Message):
+class ConfigLoadMessage(IMessage):
     def __init__(self, config_names: list[str]):
         self.config_names = config_names
 
 
-class CompressionErrorMessage(Message):
+class CompressionErrorMessage(IMessage):
     def __init__(self, title: str, message: str):
         self.title = title
         self.message = message
 
 
-class CompressionFinishedMessage(Message):
+class CompressionFinishedMessage(IMessage):
     def __init__(self, total: int):
         self.total = total
 
 
-class CompressionStartMessage(Message):
+class CompressionStartMessage(IMessage):
     def __init__(self, total: int):
         self.total = total
 
 
-class CompressionProgressMessage(Message):
+class CompressionProgressMessage(IMessage):
     def __init__(self, current: int, total: int, file_name: str):
         self.current = current
         self.total = total

@@ -1,15 +1,14 @@
 import os
-import threading
+import tkinter as tk
+import tkinter.ttk as ttk
 import webbrowser
 from queue import Queue
+from tkinter import END, NE, TOP, BooleanVar, StringVar, W, messagebox
 
-import tkinter as tk
-from tkinter import messagebox, StringVar, BooleanVar, END, TOP, W, NE
-import tkinter.ttk as ttk
 import windnd
 
-from .message import *
 from .controller import Controller
+from .model import *
 
 
 class View:
@@ -55,12 +54,16 @@ class View:
         # Create GitHub link
         github_link = tk.Label(self.root, text="github", fg="#cdcdcd", cursor="hand2")
         github_link.pack(side=TOP, anchor=NE, padx=25, pady=8)
-        github_link.bind("<Button-1>",
-                         lambda event: webbrowser.open_new_tab("https://github.com/mainite/VideoSlim"))
+        github_link.bind(
+            "<Button-1>",
+            lambda event: webbrowser.open_new_tab(
+                "https://github.com/mainite/VideoSlim"
+            ),
+        )
 
         # Title label
         self.title_var = StringVar()
-        self.title_var.set('将视频拖拽到此窗口:')
+        self.title_var.set("将视频拖拽到此窗口:")
         self.title_label = tk.Label(self.root, textvariable=self.title_var, anchor=W)
         self.title_label.place(x=26, y=8, width=380, height=24)
 
@@ -70,30 +73,49 @@ class View:
 
         # Clear button
         clear_btn_text = StringVar()
-        clear_btn_text.set('清空')
-        clear_btn = tk.Button(self.root, textvariable=clear_btn_text, command=self._clear_file_list)
+        clear_btn_text.set("清空")
+        clear_btn = tk.Button(
+            self.root, textvariable=clear_btn_text, command=self._clear_file_list
+        )
         clear_btn.place(x=168, y=291, width=88, height=40)
 
         # Compress button
         compress_btn_text = StringVar()
-        compress_btn_text.set('压缩')
-        self.compress_btn = tk.Button(self.root, textvariable=compress_btn_text, command=self._start_compression)
+        compress_btn_text.set("压缩")
+        self.compress_btn = tk.Button(
+            self.root, textvariable=compress_btn_text, command=self._start_compression
+        )
         self.compress_btn.place(x=280, y=291, width=88, height=40)
 
         # Options checkboxes
         self.recurse_var = BooleanVar()
-        recurse_check = tk.Checkbutton(self.root, text="递归(至最深深度)子文件夹里面的视频",
-                                       variable=self.recurse_var, onvalue=True, offvalue=False)
+        recurse_check = tk.Checkbutton(
+            self.root,
+            text="递归(至最深深度)子文件夹里面的视频",
+            variable=self.recurse_var,
+            onvalue=True,
+            offvalue=False,
+        )
         recurse_check.place(x=20, y=261)
 
         self.delete_source_var = BooleanVar()
-        delete_source_check = tk.Checkbutton(self.root, text="完成后删除旧文件",
-                                             variable=self.delete_source_var, onvalue=True, offvalue=False)
+        delete_source_check = tk.Checkbutton(
+            self.root,
+            text="完成后删除旧文件",
+            variable=self.delete_source_var,
+            onvalue=True,
+            offvalue=False,
+        )
         delete_source_check.place(x=20, y=287)
 
         self.delete_audio_var = BooleanVar()
-        delete_audio_check = tk.Checkbutton(self.root, text="删除音频轨道",
-                                            variable=self.delete_audio_var, onvalue=True, offvalue=False)
+        delete_audio_check = tk.Checkbutton(
+            self.root,
+            text="删除音频轨道",
+            variable=self.delete_audio_var,
+            onvalue=True,
+            offvalue=False,
+        )
         delete_audio_check.place(x=20, y=313)
 
         # Setup drag and drop
@@ -104,8 +126,14 @@ class View:
         config_label.place(x=388, y=265)
 
         self.select_config_name = StringVar(self.root, value="default")
-        self.config_combobox = ttk.Combobox(self.root, height=10, width=10, state='readonly',
-                                            values=[], textvariable=self.select_config_name)
+        self.config_combobox = ttk.Combobox(
+            self.root,
+            height=10,
+            width=10,
+            state="readonly",
+            values=[],
+            textvariable=self.select_config_name,
+        )
         self.config_combobox.place(x=388, y=291)
 
     def _on_drop_files(self, file_paths):
@@ -115,7 +143,7 @@ class View:
         Args:
             file_paths: List of file paths dropped
         """
-        files = '\n'.join(item.decode('gbk') for item in file_paths)
+        files = "\n".join(item.decode("gbk") for item in file_paths)
         self.text_box.insert(END, files + "\n")
 
     def _clear_file_list(self):
@@ -164,8 +192,10 @@ class View:
 
             if isinstance(message, CompressionProgressMessage):
                 # Update progress display
-                self.title_var.set(f"[{message.current}/{message.total}] "
-                                   f"当前处理文件：{message.file_name}，进度：{message.current / message.total: .2f}%")
+                self.title_var.set(
+                    f"[{message.current}/{message.total}] "
+                    f"当前处理文件：{message.file_name}，进度：{message.current / message.total: .2f}%"
+                )
                 self.title_label.update()
                 continue
 
@@ -204,4 +234,6 @@ class View:
         # 禁用按钮
         self.compress_btn.config(state=tk.DISABLED)
 
-        self.controller.compression(config_name, delete_audio, delete_source, lines, recurse)
+        self.controller.compression(
+            config_name, delete_audio, delete_source, lines, recurse
+        )
