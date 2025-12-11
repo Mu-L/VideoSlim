@@ -16,6 +16,14 @@ from service.message import MessageService
 
 
 class VideoService:
+    """
+    视频处理服务类，提供视频压缩和处理的核心功能
+
+    该类作为应用程序的核心服务之一，负责视频文件的压缩处理，支持单个文件处理和批量任务处理。
+    它使用FFmpeg、x264、NeroAACEnc等工具实现视频压缩，并通过消息服务发送处理状态和进度信息，
+    使UI能够实时更新处理进度。
+    """
+
     @staticmethod
     def process_single_file(
         file: VideoFile,
@@ -24,16 +32,17 @@ class VideoService:
         delete_source: bool,
     ):
         """
-        处理单个视频文件
+        处理单个视频文件的压缩任务
 
         Args:
-            file: 视频文件对象
-            config_name: 配置文件名
-            delete_audio: 是否删除音频轨道
-            delete_source: 是否删除源文件
-            index: 当前文件索引
-            total: 总文件数
-            temp_file_names: 临时文件名列表
+            file: 视频文件对象，包含源文件路径和输出路径信息
+            config_name: 压缩配置文件名，用于获取压缩参数
+            delete_audio: 是否删除视频中的音频轨道
+            delete_source: 是否在压缩完成后删除源文件
+
+        Raises:
+            ValueError: 当配置文件不存在或媒体信息读取错误时抛出
+            subprocess.CalledProcessError: 当压缩命令执行失败时抛出
         """
         config_service = ConfigService.get_instance()
 
@@ -107,7 +116,18 @@ class VideoService:
     @staticmethod
     def process_task(task: Task):
         """
-        压缩处理视频文件的主函数
+        处理视频压缩任务，支持批量处理多个视频文件
+
+        Args:
+            task: 视频处理任务对象，包含待处理文件列表和处理配置
+
+        该方法会：
+        1. 发送任务开始消息
+        2. 遍历处理任务中的每个视频文件
+        3. 发送当前文件处理进度消息
+        4. 调用process_single_file处理单个文件
+        5. 处理可能出现的异常并发送错误消息
+        6. 发送任务完成消息
         """
         message_service = MessageService.get_instance()
 
@@ -152,7 +172,13 @@ class VideoService:
     @staticmethod
     def clean_temp_files():
         """
-        清理临时文件
+        清理视频处理过程中生成的临时文件
+
+        该方法会遍历meta.TEMP_FILES中定义的所有临时文件路径，
+        并删除存在的临时文件。如果删除失败，会记录警告日志但不会抛出异常。
+
+        Returns:
+            None
         """
         for temp_file in meta.TEMP_FILES:
             if os.path.exists(temp_file):

@@ -9,15 +9,35 @@ from src import meta
 
 
 class UpdateService:
+    """
+    更新服务类，用于检查应用程序的新版本更新
+    
+    该类采用单例模式实现，提供了检查新版本的功能，
+    并在发现新版本时通过消息服务发送更新通知。
+    """
     _instance: Optional["UpdateService"] = None
 
     def __init__(self):
+        """
+        初始化更新服务实例
+        
+        Raises:
+            ValueError: 当尝试创建多个UpdateService实例时抛出
+        """
         if UpdateService._instance is not None:
             raise ValueError("UpdateService already initialized")
         UpdateService._instance = self
 
     @staticmethod
     def get_instance() -> "UpdateService":
+        """
+        获取更新服务的单例实例
+
+        Returns:
+            UpdateService: 更新服务的单例实例
+            
+        该方法采用懒加载模式，只有在第一次调用时才会创建UpdateService实例。
+        """
         if UpdateService._instance is None:
             UpdateService._instance = UpdateService()
 
@@ -26,7 +46,16 @@ class UpdateService:
     @staticmethod
     def check_for_updates():
         """
-        检测是否有新版本
+        检查是否有新版本更新
+        
+        该方法会：
+        1. 从配置的更新检查URL获取最新版本信息
+        2. 比较当前版本与最新版本
+        3. 如果发现新版本，通过消息服务发送更新通知
+        4. 记录检查过程中的异常信息
+        
+        使用requests库发送HTTP请求获取最新版本信息，
+        超时时间设置为10秒。如果检查失败，会记录警告日志。
         """
         message_service = MessageService.get_instance()
         try:

@@ -6,9 +6,25 @@ from model.config import ConfigModel, ConfigsModel
 
 
 class ConfigService:
+    """
+    配置服务类，用于管理应用程序的配置信息
+    
+    该类采用单例模式实现，确保应用程序中只有一个配置服务实例。
+    它负责从配置文件加载配置，并提供访问配置的方法。
+    """
     _instance: Optional["ConfigService"] = None
 
     def __init__(self) -> None:
+        """
+        初始化配置服务实例
+        
+        从配置文件加载配置数据，并使用ConfigModel解析配置。
+        
+        Raises:
+            ValueError: 当尝试创建多个ConfigService实例时抛出
+            FileNotFoundError: 当配置文件不存在时抛出
+            json.JSONDecodeError: 当配置文件格式错误时抛出
+        """
         if ConfigService._instance is not None:
             raise ValueError("ConfigService already initialized")
 
@@ -22,10 +38,12 @@ class ConfigService:
     @staticmethod
     def get_instance() -> "ConfigService":
         """
-        获取配置服务实例
+        获取配置服务的单例实例
 
         Returns:
-            ConfigService: 配置服务实例
+            ConfigService: 配置服务的单例实例
+            
+        该方法采用懒加载模式，只有在第一次调用时才会创建ConfigService实例。
         """
         if ConfigService._instance is None:
             ConfigService._instance = ConfigService()
@@ -34,13 +52,13 @@ class ConfigService:
 
     def get_config(self, name: str) -> Optional[ConfigModel]:
         """
-        获取指定名称的配置
+        根据名称获取指定的配置对象
 
         Args:
             name (str): 配置名称
 
         Returns:
-            Optional[ConfigsModel]: 配置模型对象，如果不存在则返回None
+            Optional[ConfigModel]: 配置模型对象，如果不存在则返回None
         """
 
         for config in self.configs_model.configs:
@@ -49,4 +67,10 @@ class ConfigService:
         return None
 
     def get_config_name_list(self) -> list[str]:
+        """
+        获取所有配置名称的列表
+
+        Returns:
+            list[str]: 所有配置名称的列表
+        """
         return [c.name for c in self.configs_model.configs]

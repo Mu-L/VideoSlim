@@ -29,6 +29,16 @@ def setup_logging():
 
 
 def main():
+    """
+    应用程序的主入口函数
+
+    该函数会：
+    1. 配置日志记录系统
+    2. 初始化所有服务（配置、消息、存储、更新）
+    3. 创建Tkinter根窗口
+    4. 初始化视图和控制器
+    5. 启动Tkinter主事件循环
+    """
     setup_logging()
 
     init_services()

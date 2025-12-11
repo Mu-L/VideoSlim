@@ -9,7 +9,23 @@ from src.utils import scan_directory
 
 
 class VideoFile:
+    """
+    视频文件类，用于封装视频文件的基本信息和操作
+
+    该类提供了视频文件的路径、名称、扩展名等属性的访问方法，
+    并实现了视频文件格式的检查功能。
+    """
+
     def __init__(self, file_path: str) -> None:
+        """
+        初始化视频文件对象
+
+        Args:
+            file_path: 视频文件的完整路径
+
+        Raises:
+            ValueError: 当文件不是支持的视频格式时抛出
+        """
         self.file_path = file_path
 
         if not self.is_supported():
@@ -71,16 +87,27 @@ class VideoFile:
 
 class TaskStatus(Enum):
     """
-    视频处理状态枚举类
+    视频处理状态枚举类，定义了视频任务的各种处理状态
     """
 
-    PENDING = "pending"
-    PROCESSING = "processing"
-    SUCCESS = "success"
-    FAILED = "failed"
+    PENDING = "pending"  # 任务待处理
+    PROCESSING = "processing"  # 任务正在处理中
+    SUCCESS = "success"  # 任务处理成功
+    FAILED = "failed"  # 任务处理失败
 
 
 class TaskInfo(BaseModel):
+    """
+    视频处理任务配置信息类，用于存储视频压缩任务的配置参数
+
+    Attributes:
+        targets: 待处理的文件或文件夹路径列表
+        process_config_name: 压缩配置文件名
+        delete_audio: 是否删除视频中的音频轨道，默认值为False
+        delete_source: 是否在压缩完成后删除源文件，默认值为False
+        recursive: 是否递归处理文件夹中的视频文件，默认值为False
+    """
+
     targets: list[str]
     process_config_name: str
     delete_audio: bool = False
@@ -90,10 +117,30 @@ class TaskInfo(BaseModel):
 
 class Task:
     """
-    视频处理模型类
+    视频处理任务类，用于管理视频压缩任务的执行状态和文件列表
+
+    该类负责：
+    1. 解析任务配置信息
+    2. 扫描并验证待处理的视频文件
+    3. 管理任务的处理状态
+    4. 提供任务文件列表和数量的访问方法
     """
 
     def __init__(self, info: TaskInfo):
+        """
+        初始化视频处理任务
+
+        Args:
+            info: 任务配置信息对象，包含待处理文件列表和处理参数
+
+        该方法会：
+        1. 初始化任务状态为待处理
+        2. 遍历处理目标路径列表
+        3. 如果是文件夹且开启递归，则扫描文件夹中的所有视频文件
+        4. 验证每个文件是否为支持的视频格式
+        5. 将验证通过的视频文件添加到处理队列
+        6. 忽略不支持的视频文件并记录警告日志
+        """
         self.current_index: int = 0
         self.info = info
 

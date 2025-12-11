@@ -15,14 +15,20 @@ from .controller import Controller
 
 
 class View:
-    """Main application class for VideoSlim"""
+    """
+    VideoSlim应用程序的主视图类
+
+    负责创建和管理用户界面，处理用户交互，并显示应用程序的状态和结果。
+    实现了视频文件的拖拽功能、压缩控制和进度显示等核心功能。
+    """
 
     def __init__(self, root: tk.Tk, controller: Controller):
         """
-        Initialize VideoSlim application
+        初始化VideoSlim应用程序视图
 
         Args:
-            root: Tkinter root window
+            root: Tkinter根窗口对象
+            controller: 控制器对象，用于处理业务逻辑
         """
         self.root = root
         self.controller = controller
@@ -36,7 +42,12 @@ class View:
         self.root.after(1000, self._check_message_queue)
 
     def _setup_ui(self):
-        """Set up the application's user interface"""
+        """
+        设置应用程序的用户界面
+
+        创建并配置所有UI组件，包括窗口、按钮、文本框、复选框等，
+        设置窗口位置、大小、图标和拖拽功能。
+        """
         # Configure root window
         self.root.title(f"VideoSlim 视频压缩 {meta.VERSION}")
         self.root.resizable(width=False, height=False)
@@ -141,21 +152,26 @@ class View:
 
     def _on_drop_files(self, file_paths):
         """
-        Handle files dropped into application
+        处理拖拽到应用程序中的文件
 
         Args:
-            file_paths: List of file paths dropped
+            file_paths: 拖拽的文件路径列表
         """
         files = "\n".join(item.decode("gbk") for item in file_paths)
         self.text_box.insert(END, files + "\n")
 
     def _clear_file_list(self):
-        """Clear the file list text box"""
+        """
+        清空文件列表文本框
+        """
         self.text_box.delete("1.0", END)
 
     def _check_message_queue(self):
         """
-        检查消息队列，处理消息
+        检查消息队列并处理接收到的消息
+
+        定期检查应用程序的消息队列，根据消息类型执行相应的处理逻辑，
+        包括显示警告、错误、更新提示，处理压缩进度和完成消息等。
         """
 
         try:
@@ -213,7 +229,12 @@ class View:
         self.root.after(1000, self._check_message_queue)
 
     def _start_compression(self):
-        """Start video compression process"""
+        """
+        启动视频压缩过程
+
+        从UI获取用户选择的配置和选项，验证文件列表，然后调用控制器
+        开始视频压缩任务，并禁用压缩按钮以防止重复点击。
+        """
         # Get selected configuration
 
         config_name = self.select_config_name.get()
