@@ -1,16 +1,14 @@
 import threading
 
-from VideoSlim.src.model.video import Task, TaskInfo
-from VideoSlim.src.service.video import VideoService
-
-from .logic import *
-from .model.message import *
+from model.video import Task, TaskInfo
+from service.updater import UpdateService
+from service.video import VideoService
 
 
 class Controller:
     def __init__(self):
         threading.Thread(
-            target=check_for_updates,
+            target=UpdateService.check_for_updates,
             daemon=True,
         ).start()
 
@@ -45,6 +43,6 @@ class Controller:
 
         threading.Thread(
             target=VideoService.process_task,
-            args=(task),
+            args=(task,),
             daemon=True,
         ).start()

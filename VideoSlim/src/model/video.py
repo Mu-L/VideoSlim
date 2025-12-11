@@ -5,7 +5,7 @@ from enum import Enum
 import meta
 from pydantic import BaseModel
 
-from VideoSlim.src.utils import scan_directory
+from src.utils import scan_directory
 
 
 class VideoFile:
@@ -88,7 +88,7 @@ class TaskInfo(BaseModel):
     recursive: bool = False
 
 
-class Task(BaseModel):
+class Task:
     """
     视频处理模型类
     """

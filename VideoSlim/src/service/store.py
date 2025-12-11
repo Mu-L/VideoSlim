@@ -1,13 +1,31 @@
-import logging
+from typing import Optional
 
-from model.store import JSONStore
+from src import meta
+from src.model.store import JSONStore
 
-global_store = JSONStore("status.json")
 
+class StoreService:
+    _instance: Optional["StoreService"] = None
 
-def init_service():
-    """初始化服务"""
-    logging.info("初始化服务")
-    global global_store
-    if global_store is None:
-        global_store = JSONStore("status.json")
+    def __init__(self) -> None:
+        if StoreService._instance is not None:
+            raise ValueError("StoreService 只能实例化一次")
+
+        self.store: JSONStore = JSONStore(meta.STORE_PATH)
+
+        self.store.open()
+
+        StoreService._instance = self
+
+    @staticmethod
+    def get_instance() -> "StoreService":
+        if StoreService._instance is None:
+            StoreService._instance = StoreService()
+
+        return StoreService._instance
+
+    def get_store(self) -> JSONStore:
+        return self.store
+
+    def dump(self):
+        self.store.dump()

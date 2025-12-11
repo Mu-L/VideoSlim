@@ -35,9 +35,18 @@ class MessageService:
         """
         self.queue.put(message)
 
+    def receive_message(self) -> IMessage:
+        """
+        从队列接收消息，会造成阻塞
+
+        Returns:
+            IMessage: 消息模型
+        """
+        return self.queue.get()
+
     def try_receive_message(self) -> Optional[IMessage]:
         """
-        从队列接收消息
+        从队列接收消息，不会造成阻塞
 
         Args:
             queue: 消息队列
