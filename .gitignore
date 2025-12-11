@@ -6,4 +6,4 @@ VideoSlim/old_vtemp.mp4
 /.idea
 /.vscode
 /.venv
-/VideoSlim/src/__pycache__
+/**/__pycache__
