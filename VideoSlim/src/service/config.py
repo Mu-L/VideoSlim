@@ -38,7 +38,7 @@ class ConfigService:
             with open(config_file_path, "r", encoding="utf-8") as f:
                 configs = json.load(f)
 
-            self.configs_model = ConfigsModel(*configs)
+            self.configs_model = ConfigsModel(**configs)
         except (TypeError, FileNotFoundError, ValueError) as e:
             match e:
                 case FileNotFoundError():
@@ -61,6 +61,9 @@ class ConfigService:
 
         # 发送配置加载消息
         config_names = self.get_config_name_list()
+
+        logging.debug(f"load config names: {config_names}")
+
         MessageService.get_instance().send_message(ConfigLoadMessage(config_names))
 
     @staticmethod
