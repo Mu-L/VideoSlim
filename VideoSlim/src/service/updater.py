@@ -2,10 +2,10 @@ import logging
 from typing import Optional
 
 import requests
-from ..model.message import UpdateMessage
-from ..service.message import MessageService
 
-from .. import meta
+from src import meta
+from src.model.message import UpdateMessage
+from src.service.message import MessageService
 
 
 class UpdateService:
