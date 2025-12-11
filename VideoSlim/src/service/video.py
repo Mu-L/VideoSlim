@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+from typing import Optional
 
 import meta
 from model.message import (
@@ -23,6 +24,27 @@ class VideoService:
     它使用FFmpeg、x264、NeroAACEnc等工具实现视频压缩，并通过消息服务发送处理状态和进度信息，
     使UI能够实时更新处理进度。
     """
+
+    _instance: Optional["VideoService"] = None
+
+    def __init__(self) -> None:
+        if self._instance is not None:
+            raise ValueError("VideoService 是单例类，不能重复实例化")
+
+        self.message_service = MessageService.get_instance()
+
+    @staticmethod
+    def get_instance() -> "VideoService":
+        """
+        获取 VideoService 的单例实例
+
+        Returns:
+            VideoService: VideoService 的单例实例
+        """
+        if VideoService._instance is None:
+            VideoService._instance = VideoService()
+
+        return VideoService._instance
 
     @staticmethod
     def process_single_file(
