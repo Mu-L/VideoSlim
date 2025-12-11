@@ -11,8 +11,8 @@ from model.message import (
 )
 from model.video import Task, VideoFile
 from pymediainfo import MediaInfo
-from service.config import config_service
-from service.message import message_service
+from service.config import ConfigService
+from service.message import MessageService
 
 
 class VideoService:
@@ -35,6 +35,7 @@ class VideoService:
             total: 总文件数
             temp_file_names: 临时文件名列表
         """
+        config_service = ConfigService.get_instance()
 
         # 读取配置
         config = config_service.get_config(config_name)
@@ -108,6 +109,7 @@ class VideoService:
         """
         压缩处理视频文件的主函数
         """
+        message_service = MessageService.get_instance()
 
         if task.files_num:
             message_service.send_message(

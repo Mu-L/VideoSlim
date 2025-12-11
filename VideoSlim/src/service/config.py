@@ -1,19 +1,36 @@
 import json
-import logging
 from typing import Optional
 
 import meta
 from model.config import ConfigModel, ConfigsModel
 
 
-class _ConfigService:
+class ConfigService:
+    _instance: Optional["ConfigService"] = None
+
     def __init__(self) -> None:
+        if ConfigService._instance is not None:
+            raise ValueError("ConfigService already initialized")
+
         config_file_path = meta.CONFIG_FILE_PATH
 
         with open(config_file_path, "r") as f:
             configs = json.load(f)
 
         self.configs_model = ConfigsModel(*configs)
+
+    @staticmethod
+    def get_instance() -> "ConfigService":
+        """
+        获取配置服务实例
+
+        Returns:
+            ConfigService: 配置服务实例
+        """
+        if ConfigService._instance is None:
+            ConfigService._instance = ConfigService()
+
+        return ConfigService._instance
 
     def get_config(self, name: str) -> Optional[ConfigModel]:
         """
@@ -33,14 +50,3 @@ class _ConfigService:
 
     def get_config_name_list(self) -> list[str]:
         return [c.name for c in self.configs_model.configs]
-
-
-def init_service():
-    """初始化服务"""
-    global config_service
-    logging.info("初始化服务")
-    if config_service is None:
-        config_service = _ConfigService()
-
-
-config_service = _ConfigService()

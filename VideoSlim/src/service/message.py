@@ -4,9 +4,27 @@ from typing import Optional
 from model.message import IMessage
 
 
-class _MessageService:
+class MessageService:
+    _instance: Optional["MessageService"] = None
+
     def __init__(self) -> None:
+        if MessageService._instance is not None:
+            raise ValueError("MessageService already initialized")
+
         self.queue = Queue()
+
+    @staticmethod
+    def get_instance() -> "MessageService":
+        """
+        获取消息服务实例
+
+        Returns:
+            MessageService: 消息服务实例
+        """
+        if MessageService._instance is None:
+            MessageService._instance = MessageService()
+
+        return MessageService._instance
 
     def send_message(self, message: IMessage):
         """
@@ -30,13 +48,3 @@ class _MessageService:
         if self.queue.empty():
             return None
         return self.queue.get_nowait()
-
-
-def init_service():
-    """初始化服务"""
-    global message_service
-    if message_service is None:
-        message_service = _MessageService()
-
-
-message_service = _MessageService()

@@ -1,10 +1,15 @@
 import logging
 
-from . import config, message
+from .config import ConfigService
+from .message import MessageService
+from .updater import UpdateService
 
 
 def init_services():
+    global config_service, message_service, update_service
     """初始化服务"""
     logging.info("初始化服务")
-    config.init_service()
-    message.init_service()
+
+    config_service = ConfigService.get_instance()
+    message_service = MessageService.get_instance()
+    update_service = UpdateService.get_instance()
