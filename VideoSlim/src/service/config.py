@@ -40,9 +40,24 @@ class ConfigService:
 
             self.configs_model = ConfigsModel(*configs)
         except (TypeError, FileNotFoundError, ValueError) as e:
-            logging.error(f"Error loading config file: {e}")
+            match e:
+                case FileNotFoundError():
+                    logging.warning(f"Config file not found: {config_file_path}")
+                case TypeError():
+                    logging.error(f"Decode config file error: {e}")
+                case ValueError():
+                    logging.error(f"ValueError occur when load config: {e}")
+                case _:
+                    logging.error(f"Error loading config file: {e}")
+
+            logging.warning("generate default config.")
+
             # 重新生成默认配置
             self.configs_model = ConfigsModel()
+
+            # 导出默认配置
+            with open(config_file_path, "w", encoding="utf-8") as f:
+                f.write(self.configs_model.model_dump_json(indent=4))
 
         # 发送配置加载消息
         config_names = self.get_config_name_list()

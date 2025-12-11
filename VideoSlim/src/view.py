@@ -1,17 +1,16 @@
 import os
-import queue
 import tkinter as tk
 import tkinter.ttk as ttk
 import webbrowser
 from queue import Queue
 from tkinter import END, NE, TOP, BooleanVar, StringVar, W, messagebox
 
-from src import meta
 import windnd
+
+from src import meta
+from src.controller import Controller
 from src.model import message
 from src.service.message import MessageService
-
-from src.controller import Controller
 
 
 class View:
@@ -174,56 +173,55 @@ class View:
         包括显示警告、错误、更新提示，处理压缩进度和完成消息等。
         """
 
-        try:
-            while True:
-                msg = MessageService.get_instance().try_receive_message()
+        while True:
+            msg = MessageService.get_instance().try_receive_message()
 
-                match msg:
-                    case message.WarningMessage(title=t, message=m):
-                        # Display warning message
-                        messagebox.showwarning(t, m)
-                    case message.UpdateMessage():
-                        # Update message box
-                        messagebox.showinfo("更新提示", "有新版本可用，请前往官网更新")
-                    case message.ErrorMessage(title=t, message=m):
-                        # Display error message
-                        messagebox.showerror(t, m)
-                    case message.ExitMessage():
-                        # Exit application
-                        self.root.destroy()
-                    case message.ConfigLoadMessage(config_names=config_names):
-                        # 将加载的配置显示在选项框，并自动选中第一个
-                        self.config_combobox.config(values=config_names)
-                        self.select_config_name.set(config_names[0])
-                    case message.CompressionStartMessage():
-                        # Disable button
-                        self.compress_btn.config(state=tk.DISABLED)
-                    case message.CompressionProgressMessage(
-                        current=current, total=total, file_name=file_name
-                    ):
-                        # Update progress display
-                        self.title_var.set(
-                            f"[{current}/{total}] "
-                            f"当前处理文件：{file_name}，进度：{current / total: .2f}%"
-                        )
-                        self.title_label.update()
-                    case message.CompressionFinishedMessage():
-                        messagebox.showinfo("提示", "转换完成")
-                        self.compress_btn.config(state=tk.NORMAL)
-                    case message.CompressionErrorMessage(title=t, message=m):
-                        # Display error message
-                        messagebox.showerror(t, m)
-                        self.compress_btn.config(state=tk.NORMAL)
-                    case message.CompressionFinishedMessage(total=total):
-                        # All files processed
-                        self.title_var.set(f"处理完成！已经处理 {total} 个文件")
-                        self.title_label.update()
-                        messagebox.showinfo("提示", "转换完成")
-                        self.compress_btn.config(state=tk.NORMAL)
-                    case _:
-                        continue
-        except queue.Empty:
-            pass
+            match msg:
+                case None:
+                    break
+                case message.WarningMessage(title=t, message=m):
+                    # Display warning message
+                    messagebox.showwarning(t, m)
+                case message.UpdateMessage():
+                    # Update message box
+                    messagebox.showinfo("更新提示", "有新版本可用，请前往官网更新")
+                case message.ErrorMessage(title=t, message=m):
+                    # Display error message
+                    messagebox.showerror(t, m)
+                case message.ExitMessage():
+                    # Exit application
+                    self.root.destroy()
+                case message.ConfigLoadMessage(config_names=config_names):
+                    # 将加载的配置显示在选项框，并自动选中第一个
+                    self.config_combobox.config(values=config_names)
+                    self.select_config_name.set(config_names[0])
+                case message.CompressionStartMessage():
+                    # Disable button
+                    self.compress_btn.config(state=tk.DISABLED)
+                case message.CompressionProgressMessage(
+                    current=current, total=total, file_name=file_name
+                ):
+                    # Update progress display
+                    self.title_var.set(
+                        f"[{current}/{total}] "
+                        f"当前处理文件：{file_name}，进度：{current / total: .2f}%"
+                    )
+                    self.title_label.update()
+                case message.CompressionFinishedMessage():
+                    messagebox.showinfo("提示", "转换完成")
+                    self.compress_btn.config(state=tk.NORMAL)
+                case message.CompressionErrorMessage(title=t, message=m):
+                    # Display error message
+                    messagebox.showerror(t, m)
+                    self.compress_btn.config(state=tk.NORMAL)
+                case message.CompressionFinishedMessage(total=total):
+                    # All files processed
+                    self.title_var.set(f"处理完成！已经处理 {total} 个文件")
+                    self.title_label.update()
+                    messagebox.showinfo("提示", "转换完成")
+                    self.compress_btn.config(state=tk.NORMAL)
+                case _:
+                    continue
 
         # Schedule next check
         self.root.after(1000, self._check_message_queue)
