@@ -20,9 +20,9 @@ def setup_logging():
     配置包括日志级别、输出文件、文件写入模式以及日志格式。
     """
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         filename="log.txt",
-        filemode="a+",
+        filemode="w",
         format="%(asctime)s - %(levelname)s - %(message)s",
         encoding="utf-8",
     )

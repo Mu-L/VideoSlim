@@ -62,7 +62,10 @@ class ConfigService:
         # 发送配置加载消息
         config_names = self.get_config_name_list()
 
-        logging.debug(f"load config names: {config_names}")
+        logging.info(f"load config names: {config_names}")
+        logging.debug(
+            f"configs: {[c.model_dump() for c in self.configs_model.configs]}"
+        )
 
         MessageService.get_instance().send_message(ConfigLoadMessage(config_names))
 

@@ -3,6 +3,8 @@ import os
 import subprocess
 from typing import Optional
 
+from pymediainfo import MediaInfo
+
 from src import meta
 from src.model.message import (
     CompressionErrorMessage,
@@ -11,7 +13,6 @@ from src.model.message import (
     CompressionStartMessage,
 )
 from src.model.video import Task, VideoFile
-from pymediainfo import MediaInfo
 from src.service.config import ConfigService
 from src.service.message import MessageService
 
@@ -75,7 +76,7 @@ class VideoService:
             raise ValueError(f"配置文件 {config_name} 不存在")
 
         # Generate output filename
-        output_path = file.output_fullname
+        output_path = file.output_path
 
         # Get media info
         media_info = MediaInfo.parse(file.file_path)
@@ -129,7 +130,23 @@ class VideoService:
         # Execute commands
         for command in commands:
             logging.info(f"执行命令: {command}")
-            subprocess.check_call(command, creationflags=subprocess.CREATE_NO_WINDOW)
+            result = subprocess.run(
+                command,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                capture_output=True,
+                text=True,
+            )
+
+            # Log command output
+            if result.stdout:
+                logging.debug(f"命令输出: {result.stdout.strip()}")
+            # if result.stderr:
+            #     logging.warning(f"命令警告: {result.stderr.strip()}")
+
+            # Check return code
+            if result.returncode != 0:
+                logging.error(f"命令执行失败，退出码: {result.returncode}")
+                raise subprocess.CalledProcessError(result.returncode, command)
 
         # Delete source if requested
         if delete_source and os.path.exists(output_path):
@@ -153,7 +170,11 @@ class VideoService:
         """
         message_service = MessageService.get_instance()
 
-        if task.files_num:
+        logging.info(f"process task: {task.info}")
+
+        logging.debug(f"process task sequence: {task.video_sequence}")
+
+        if task.files_num == 0:
             message_service.send_message(
                 CompressionErrorMessage("错误", "没有找到可处理的视频文件")
             )

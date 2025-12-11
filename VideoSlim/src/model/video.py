@@ -2,10 +2,10 @@ import logging
 import os
 from enum import Enum
 
-from .. import meta
 from pydantic import BaseModel
 
-from ..utils import scan_directory
+from src import meta
+from src.utils import scan_directory
 
 
 class VideoFile:
@@ -30,6 +30,9 @@ class VideoFile:
 
         if not self.is_supported():
             raise ValueError(f"文件 {self.file_path} 不是支持的视频文件")
+
+    def __repr__(self) -> str:
+        return f"VideoFile({self.file_path})"
 
     @property
     def fullname(self) -> str:
@@ -70,6 +73,16 @@ class VideoFile:
             str: 压缩后的视频文件名（包含扩展名）
         """
         return f"{self.filename}_x264{self.ext}"
+
+    @property
+    def output_path(self) -> str:
+        """
+        获取压缩后的视频文件的输出路径（包含文件名）
+
+        Returns:
+            str: 压缩后的视频文件的输出路径（包含文件名）
+        """
+        return os.path.join(os.path.dirname(self.file_path), self.output_fullname)
 
     def is_supported(self) -> bool:
         """
