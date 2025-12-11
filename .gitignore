@@ -7,3 +7,4 @@ VideoSlim/old_vtemp.mp4
 /.vscode
 /.venv
 /**/__pycache__
+.ruff_cache
