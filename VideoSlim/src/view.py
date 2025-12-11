@@ -11,6 +11,7 @@ from src import meta
 from src.controller import Controller
 from src.model import message
 from src.service.message import MessageService
+from src.service.store import StoreService
 
 
 class View:
@@ -36,6 +37,8 @@ class View:
         self.configs_dict = {}
 
         self._setup_ui()
+
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         # Setup message queue checking
         self.root.after(50, self._check_message_queue)
@@ -158,6 +161,16 @@ class View:
         """
         files = "\n".join(item.decode("gbk") for item in file_paths)
         self.text_box.insert(END, files + "\n")
+
+    def _on_close(self):
+        """
+        处理应用程序关闭事件
+
+        当用户点击关闭按钮时，会调用此方法。
+        该方法会发送一个退出消息到消息队列，通知其他组件应用程序正在关闭。
+        """
+        StoreService.get_instance().dump()
+        MessageService.get_instance().send_message(message.ExitMessage())
 
     def _clear_file_list(self):
         """
