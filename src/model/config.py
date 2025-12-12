@@ -1,4 +1,18 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+type X264Preset = Literal[
+    "ultrafast",
+    "superfast",
+    "veryfast",
+    "faster",
+    "fast",
+    "medium",
+    "slow",
+    "slower",
+    "veryslow",
+]
 
 
 class X264ConfigModel(BaseModel):
@@ -11,11 +25,9 @@ class X264ConfigModel(BaseModel):
     crf: float = Field(
         default=23.5, gt=0, lt=51, description="CRF值，范围在0-51之间，值越小质量越高"
     )
-    preset: int = Field(
-        default=8,
-        gt=0,
-        lt=9,
-        description="编码预设值，范围在0-9之间，值越大编码速度越快",
+    preset: X264Preset = Field(
+        default="slower",
+        description="x264编码预设",
     )
     I: int = Field(default=600, description="关键帧间隔，影响视频的可编辑性和压缩率")
     r: int = Field(default=4, description="B帧参考数，影响视频质量和编码速度")

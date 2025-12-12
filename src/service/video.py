@@ -85,22 +85,8 @@ class VideoService:
 
         ffmpeg_path = meta.FFMPEG_PATH
 
-        # Define preset mapping from numeric value to x264 preset string
-        preset_mapping = {
-            0: "placebo",
-            1: "veryslow",
-            2: "slower",
-            3: "slow",
-            4: "medium",
-            5: "fast",
-            6: "faster",
-            7: "veryfast",
-            8: "superfast",
-            9: "ultrafast",
-        }
-
         # Get preset string
-        preset = preset_mapping.get(config.x264.preset, "medium")
+        preset = config.x264.preset
         input_file = file.file_path
 
         if not delete_audio:
