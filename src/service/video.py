@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import sys
 from typing import Optional
 
 from pymediainfo import MediaInfo
@@ -92,17 +91,7 @@ class VideoService:
 
         commands = []
 
-        # Get tool path - handle both packaged and development environments
-        def get_tool_path(tool_name):
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
-            if hasattr(sys, "_MEIPASS"):
-                # Running in a bundled environment
-                return os.path.join(sys._MEIPASS, "tools", tool_name)  # type: ignore[attr-defined]
-            else:
-                # Running in a development environment
-                return os.path.join("./tools", tool_name)
-
-        ffmpeg_path = get_tool_path("ffmpeg.exe")
+        ffmpeg_path = meta.FFMPEG_PATH
 
         # Handle video rotation if needed
         pre_temp: Optional[str] = None
