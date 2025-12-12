@@ -1,7 +1,7 @@
 {
     "configs": [
         {
-            "name": "saving",
+            "name": "default",
             "x264": {
                 "crf": 23.5,
                 "preset": 8,
