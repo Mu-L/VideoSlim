@@ -104,33 +104,51 @@ class VideoService:
         # Generate compression commands based on audio presence
         has_audio = len(media_info.audio_tracks) > 0 and not delete_audio
 
+        # Define preset mapping from numeric value to x264 preset string
+        preset_mapping = {
+            0: "placebo",
+            1: "veryslow",
+            2: "slower",
+            3: "slow",
+            4: "medium",
+            5: "fast",
+            6: "faster",
+            7: "veryfast",
+            8: "superfast",
+            9: "ultrafast",
+        }
+
+        # Get preset string
+        preset = preset_mapping.get(config.x264.preset, "medium")
+        input_file = pre_temp if pre_temp else file.file_path
+
         if has_audio:
-            # Process with audio
-            commands.extend(
-                [
-                    # Extract audio to WAV
-                    f'./tools/ffmpeg.exe -i "{file.file_path}" -vn -sn -v 0 -c:a pcm_s16le -f wav "./old_atemp.wav"',
-                    # Encode audio with AAC
-                    './tools/neroAacEnc.exe -ignorelength -lc -br 128000 -if "./old_atemp.wav" -of "./old_atemp.mp4"',
-                    # Encode video with x264
-                    f"./tools/x264_64-8bit.exe --crf {config.x264.crf} --preset {config.x264.preset} "
-                    f"-I {config.x264.I} -r {config.x264.r} -b {config.x264.b} "
-                    f"--me umh -i 1 --scenecut 60 -f 1:1 --qcomp 0.5 --psy-rd 0.3:0 "
-                    f'--aq-mode 2 --aq-strength 0.8 -o "./old_vtemp.mp4" "{pre_temp if pre_temp else file.file_path}"'
-                    + (" --opencl" if config.x264.opencl_acceleration else ""),
-                    # Mux video and audio
-                    f'./tools/mp4box.exe -add "./old_vtemp.mp4#trackID=1:name=" '
-                    f'-add "./old_atemp.mp4#trackID=1:name=" -new "{output_path}"',
-                ]
+            # Process with audio using single ffmpeg command
+            commands.append(
+                f'./tools/ffmpeg.exe -nostats -i "{input_file}" '
+                + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
+                + f"-keyint_min {config.x264.I} -g {config.x264.I} "
+                + f"-refs {config.x264.r} -bf {config.x264.b} "
+                + "-me_method umh -sc_threshold 60 -b_strategy 1 -qcomp 0.5 -psy-rd 0.3:0 "
+                + "-aq-mode 2 -aq-strength 0.8 "
+                + "-c:a aac -b:a 128k "
+                + "-movflags faststart "
+                + ("-hwaccel auto " if config.x264.opencl_acceleration else "")
+                + f'"{output_path}"'
             )
         else:
-            # Process without audio
+            # Process without audio using single ffmpeg command
             commands.append(
-                f"./tools/x264_64-8bit.exe --crf {config.x264.crf} --preset {config.x264.preset} "
-                f"-I {config.x264.I} -r {config.x264.r} -b {config.x264.b} "
-                f"--me umh -i 1 --scenecut 60 -f 1:1 --qcomp 0.5 --psy-rd 0.3:0 "
-                f'--aq-mode 2 --aq-strength 0.8 -o "{output_path}" "{file.file_path}"'
-                + (" --opencl" if config.x264.opencl_acceleration else "")
+                f'./tools/ffmpeg.exe -nostats -i "{input_file}" '
+                + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
+                + f"-keyint_min {config.x264.I} -g {config.x264.I} "
+                + f"-refs {config.x264.r} -bf {config.x264.b} "
+                + "-me umh -scenecut 60 -b_strategy 1 -qcomp 0.5 -psy-rd 0.3:0 "
+                + "-aq-mode 2 -aq-strength 0.8 "
+                + "-an "
+                + "-movflags faststart "
+                + ("-hwaccel auto " if config.x264.opencl_acceleration else "")
+                + f'"{output_path}"'
             )
 
         # Execute commands
@@ -147,9 +165,9 @@ class VideoService:
 
             # Log command output
             if result.stdout:
-                logging.debug(f"命令输出: {result.stdout.strip()}")
-            # if result.stderr:
-            #     logging.warning(f"命令警告: {result.stderr.strip()}")
+                logging.debug(f"command stdout: {result.stdout.strip()}")
+            if result.stderr:
+                logging.warning(f"command stderr: {result.stderr.strip()}")
 
             # Check return code
             if result.returncode != 0:

@@ -18,4 +18,4 @@ CONFIG_FILE_PATH = "config.json"
 STORE_PATH = "store"
 
 # 临时文件路径列表
-TEMP_FILES = ["./pre_temp.mp4", "./old_atemp.wav", "./old_atemp.mp4", "./old_vtemp.mp4"]
+TEMP_FILES = ["./pre_temp.mp4"]

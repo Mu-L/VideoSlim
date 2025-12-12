@@ -238,21 +238,21 @@ class View:
                     self.title_label.update()
                     self.total_bar["value"] = (current / total) * 100
                     self.total_bar.update()
-                case message.CompressionFinishedMessage():
-                    messagebox.showinfo("提示", "转换完成")
-                    self.compress_btn.config(state=tk.NORMAL)
-                    self.total_bar["value"] = 100
-                    self.total_bar.update()
                 case message.CompressionErrorMessage(title=t, message=m):
                     # Display error message
                     messagebox.showerror(t, m)
                     self.compress_btn.config(state=tk.NORMAL)
                 case message.CompressionFinishedMessage(total=total):
                     # All files processed
+                    messagebox.showinfo("提示", "转换结束")
                     self.title_var.set(f"处理完成！已经处理 {total} 个文件")
                     self.title_label.update()
-                    messagebox.showinfo("提示", "转换完成")
                     self.compress_btn.config(state=tk.NORMAL)
+
+                    self.cur_bar["value"] = 0
+                    self.cur_bar.update()
+                    self.total_bar["value"] = 100
+                    self.total_bar.update()
                 case _:
                     continue
 
