@@ -85,7 +85,14 @@ class View:
 
         # File list text box
         self.text_box = tk.Text(self.root, width=100, height=20)
-        self.text_box.place(x=24, y=40, width=480, height=220)
+        self.text_box.place(x=24, y=40, width=480, height=190)
+
+        # Progress bar
+        self.cur_bar = ttk.Progressbar(self.root, orient="horizontal", maximum=100)
+        self.cur_bar.place(x=24, y=230, width=480, height=20)
+
+        self.total_bar = ttk.Progressbar(self.root, orient="horizontal", maximum=100)
+        self.total_bar.place(x=24, y=250, width=480, height=10)
 
         # Clear button
         clear_btn_text = StringVar()
@@ -211,8 +218,13 @@ class View:
                 case message.CompressionStartMessage():
                     # Disable button
                     self.compress_btn.config(state=tk.DISABLED)
-                case message.CompressionProgressMessage(
-                    current=current, total=total, file_name=file_name
+                case message.CompressionCurrentProgressMessage(
+                    file_name=_, current=current, total=total
+                ):
+                    self.cur_bar["value"] = current / total * 100
+                    self.cur_bar.update()
+                case message.CompressionTotalProgressMessage(
+                    current=current, total=total, file_name=file_name, progress=_
                 ):
                     # Update progress display
                     self.title_var.set(
@@ -220,9 +232,13 @@ class View:
                         f"当前处理文件：{file_name}，进度：{current / total: .2f}%"
                     )
                     self.title_label.update()
+                    self.total_bar["value"] = current / total * 100
+                    self.total_bar.update()
                 case message.CompressionFinishedMessage():
                     messagebox.showinfo("提示", "转换完成")
                     self.compress_btn.config(state=tk.NORMAL)
+                    self.total_bar["value"] = 100
+                    self.total_bar.update()
                 case message.CompressionErrorMessage(title=t, message=m):
                     # Display error message
                     messagebox.showerror(t, m)

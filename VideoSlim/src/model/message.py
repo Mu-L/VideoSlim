@@ -156,7 +156,18 @@ class CompressionStartMessage(IMessage):
         self.total = total
 
 
-class CompressionProgressMessage(IMessage):
+class CompressionCurrentProgressMessage(IMessage):
+    """
+    当前文件压缩进度
+    """
+
+    def __init__(self, file_name: str, current: int, total: int) -> None:
+        self.file_name = file_name
+        self.current = current
+        self.total = total
+
+
+class CompressionTotalProgressMessage(IMessage):
     """
     压缩进度消息类，用于传递视频压缩任务的进度信息
 
@@ -166,7 +177,12 @@ class CompressionProgressMessage(IMessage):
         file_name: 当前正在处理的文件名
     """
 
-    def __init__(self, current: int, total: int, file_name: str):
+    def __init__(
+        self,
+        current: int,
+        total: int,
+        file_name: str,
+    ):
         """
         初始化压缩进度消息
 
@@ -174,6 +190,7 @@ class CompressionProgressMessage(IMessage):
             current: 当前正在处理的文件索引（从1开始）
             total: 待处理的文件总数
             file_name: 当前正在处理的文件名（包含路径）
+            progress: 当前文件的压缩进度（0-1之间的浮点数）
         """
         self.current = current
         self.total = total

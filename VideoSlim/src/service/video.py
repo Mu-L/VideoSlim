@@ -7,10 +7,11 @@ from pymediainfo import MediaInfo
 
 from src import meta
 from src.model.message import (
+    CompressionCurrentProgressMessage,
     CompressionErrorMessage,
     CompressionFinishedMessage,
-    CompressionProgressMessage,
     CompressionStartMessage,
+    CompressionTotalProgressMessage,
 )
 from src.model.video import Task, VideoFile
 from src.service.config import ConfigService
@@ -128,8 +129,10 @@ class VideoService:
             )
 
         # Execute commands
-        for command in commands:
+        total_commands = len(commands)
+        for index, command in enumerate(commands):
             logging.info(f"执行命令: {command}")
+
             result = subprocess.run(
                 command,
                 creationflags=subprocess.CREATE_NO_WINDOW,
@@ -147,6 +150,14 @@ class VideoService:
             if result.returncode != 0:
                 logging.error(f"命令执行失败，退出码: {result.returncode}")
                 raise subprocess.CalledProcessError(result.returncode, command)
+
+            MessageService.get_instance().send_message(
+                CompressionCurrentProgressMessage(
+                    file_name=file.file_path,
+                    current=index + 1,
+                    total=total_commands,
+                )
+            )
 
         # Delete source if requested
         if delete_source and os.path.exists(output_path):
@@ -186,7 +197,11 @@ class VideoService:
         for index, video_file in enumerate(task.video_sequence, 1):
             # Notify start of processing
             message_service.send_message(
-                CompressionProgressMessage(index, task.files_num, video_file.file_path)
+                CompressionTotalProgressMessage(
+                    index,
+                    task.files_num,
+                    video_file.file_path,
+                )
             )
 
             try:
