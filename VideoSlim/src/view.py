@@ -218,6 +218,10 @@ class View:
                 case message.CompressionStartMessage():
                     # Disable button
                     self.compress_btn.config(state=tk.DISABLED)
+                    self.cur_bar["value"] = 0
+                    self.cur_bar.update()
+                    self.total_bar["value"] = 0
+                    self.total_bar.update()
                 case message.CompressionCurrentProgressMessage(
                     file_name=_, current=current, total=total
                 ):
@@ -232,7 +236,7 @@ class View:
                         f"当前处理文件：{file_name}，进度：{current / total: .2f}%"
                     )
                     self.title_label.update()
-                    self.total_bar["value"] = current / total * 100
+                    self.total_bar["value"] = (current / total) * 100
                     self.total_bar.update()
                 case message.CompressionFinishedMessage():
                     messagebox.showinfo("提示", "转换完成")
