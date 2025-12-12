@@ -65,7 +65,43 @@ class UpdateService:
 
             if data and len(data) > 0:
                 latest_release = data[0]
-                if latest_release["tag_name"] != meta.VERSION:
+                if UpdateService.is_new_version(
+                    meta.VERSION, latest_release["tag_name"]
+                ):
                     message_service.send_message(UpdateMessage())
         except Exception as e:
             logging.warning(f"检查更新失败: {e}")
+
+    @staticmethod
+    def is_new_version(current_version: str, latest_version: str) -> bool:
+        """
+        检查是否有新版本更新
+
+        Args:
+            current_version (str): 当前应用程序版本号
+            latest_version (str): 最新版本号
+
+        Returns:
+            bool: 如果有新版本则返回True，否则返回False
+        """
+        # 移除版本号前缀（如"v"）
+        current_version = current_version.lstrip("v")
+        latest_version = latest_version.lstrip("v")
+
+        # 移除版本号中的预发布标签（如"-alpha"）
+        current_version = current_version.split("-")[0]
+        latest_version = latest_version.split("-")[0]
+
+        # 按点分隔版本号
+        current_parts = current_version.split(".")
+        latest_parts = latest_version.split(".")
+
+        # 比较每个部分的数值
+        for i in range(min(len(current_parts), len(latest_parts))):
+            if int(latest_parts[i]) > int(current_parts[i]):
+                return True
+            elif int(latest_parts[i]) < int(current_parts[i]):
+                return False
+
+        # 如果所有部分都相等，且最新版本号更长，则为新版本
+        return len(latest_parts) > len(current_parts)
