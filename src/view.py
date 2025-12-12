@@ -240,7 +240,7 @@ class View:
                     # Update progress display
                     self.title_var.set(
                         f"[{current}/{total}] "
-                        f"当前处理文件：{file_name}，进度：{current / total: .2f}%"
+                        f"当前处理文件：{file_name}，进度：{current / total * 100: .2f}%"
                     )
                     self.title_label.update()
                     self.total_bar["value"] = (current / total) * 100
