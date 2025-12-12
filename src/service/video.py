@@ -175,6 +175,7 @@ class VideoService:
 
         # Delete source if requested
         if delete_source and os.path.exists(output_path):
+            logging.debug(f"存在输出文件：{output_path}，删除源文件: {file.file_path}")
             os.remove(file.file_path)
 
     @timer
@@ -210,6 +211,10 @@ class VideoService:
 
         # Process each file
         for index, video_file in enumerate(task.video_sequence, 1):
+            logging.debug(
+                f"process file: {video_file.file_path}, index: {index}, total: {task.files_num}"
+            )
+
             # Notify start of processing
             message_service.send_message(
                 CompressionTotalProgressMessage(
