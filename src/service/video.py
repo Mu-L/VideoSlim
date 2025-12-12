@@ -106,7 +106,7 @@ class VideoService:
         if not delete_audio:
             # Process with audio using single ffmpeg command
             commands.append(
-                f'"{ffmpeg_path}" -nostats -i "{input_file}" '
+                f'"{ffmpeg_path}" -y -nostats -i "{input_file}" '
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
@@ -120,7 +120,7 @@ class VideoService:
         else:
             # Process without audio using single ffmpeg command
             commands.append(
-                f'"{ffmpeg_path}" -nostats -i "{input_file}" '
+                f'"{ffmpeg_path}" -y -nostats -i "{input_file}" '
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
