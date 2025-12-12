@@ -3,8 +3,6 @@ import os
 import subprocess
 from typing import Optional
 
-from pymediainfo import MediaInfo
-
 from src import meta
 from src.model.message import (
     CompressionCurrentProgressMessage,
@@ -81,30 +79,9 @@ class VideoService:
         # Generate output filename
         output_path = file.output_path
 
-        # Get media info
-        media_info = MediaInfo.parse(file.file_path)
-        if isinstance(media_info, str):
-            logging.error("media_info 读取视频信息错误: 读取到文本")
-            raise ValueError("media_info 读取视频信息错误: 读取到文本")
-
-        logging.debug(f"读取视频信息: {file.file_path}，视频信息：{media_info}")
-
         commands = []
 
         ffmpeg_path = meta.FFMPEG_PATH
-
-        # Handle video rotation if needed
-        pre_temp: Optional[str] = None
-        if (
-            hasattr(media_info.video_tracks[0], "other_rotation")
-            and media_info.video_tracks[0].other_rotation
-        ):
-            logging.info("视频元信息含有旋转，进行预处理")
-            pre_temp = "./pre_temp.mp4"
-            commands.append(f'"{ffmpeg_path}" -i "{file.file_path}" "{pre_temp}"')
-
-        # Generate compression commands based on audio presence
-        has_audio = len(media_info.audio_tracks) > 0 and not delete_audio
 
         # Define preset mapping from numeric value to x264 preset string
         preset_mapping = {
@@ -122,9 +99,9 @@ class VideoService:
 
         # Get preset string
         preset = preset_mapping.get(config.x264.preset, "medium")
-        input_file = pre_temp if pre_temp else file.file_path
+        input_file = file.file_path
 
-        if has_audio:
+        if not delete_audio:
             # Process with audio using single ffmpeg command
             commands.append(
                 f'"{ffmpeg_path}" -nostats -i "{input_file}" '
