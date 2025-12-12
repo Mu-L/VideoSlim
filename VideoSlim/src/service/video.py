@@ -16,6 +16,7 @@ from src.model.message import (
 from src.model.video import Task, VideoFile
 from src.service.config import ConfigService
 from src.service.message import MessageService
+from src.utils import timer
 
 
 class VideoService:
@@ -48,6 +49,7 @@ class VideoService:
 
         return VideoService._instance
 
+    @timer
     @staticmethod
     def process_single_file(
         file: VideoFile,
@@ -84,6 +86,8 @@ class VideoService:
         if isinstance(media_info, str):
             logging.error("media_info 读取视频信息错误: 读取到文本")
             raise ValueError("media_info 读取视频信息错误: 读取到文本")
+
+        logging.debug(f"读取视频信息: {file.file_path}，视频信息：{media_info}")
 
         commands = []
 
@@ -163,6 +167,7 @@ class VideoService:
         if delete_source and os.path.exists(output_path):
             os.remove(file.file_path)
 
+    @timer
     @staticmethod
     def process_task(task: Task):
         """

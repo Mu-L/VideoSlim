@@ -1,4 +1,6 @@
+import logging
 import os
+from functools import wraps
 
 
 def scan_directory(
@@ -37,3 +39,29 @@ def scan_directory(
         files.extend(f)
 
     return subfolders, files
+
+
+def timer(f):
+    """
+    计时器装饰器，用于测量函数执行时间
+
+    Args:
+        f: 要装饰的函数
+
+    Returns:
+        callable: 包装后的函数，执行时会打印函数名和执行时间
+    """
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        import time
+
+        start_time = time.time()
+        result = f(*args, **kwargs)
+        end_time = time.time()
+        logging.debug(
+            f"Function {f.__name__} executed in {end_time - start_time:.4f} seconds"
+        )
+        return result
+
+    return wrapper
