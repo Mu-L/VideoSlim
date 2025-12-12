@@ -235,7 +235,7 @@ class View:
                     self.cur_bar["value"] = current / total * 100
                     self.cur_bar.update()
                 case message.CompressionTotalProgressMessage(
-                    current=current, total=total, file_name=file_name, progress=_
+                    current=current, total=total, file_name=file_name
                 ):
                     # Update progress display
                     self.title_var.set(
