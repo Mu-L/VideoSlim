@@ -145,7 +145,7 @@ class VideoService:
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
-                + "-me umh -scenecut 60 -b_strategy 1 -qcomp 0.5 -psy-rd 0.3:0 "
+                + "-me_method umh -sc_threshold 60 -b_strategy 1 -qcomp 0.5 -psy-rd 0.3:0 "
                 + "-aq-mode 2 -aq-strength 0.8 "
                 + "-an "
                 + "-movflags faststart "
