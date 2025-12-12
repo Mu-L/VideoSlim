@@ -1,0 +1,15 @@
+{
+    "configs": [
+        {
+            "name": "default",
+            "x264": {
+                "crf": 23.5,
+                "preset": 8,
+                "I": 600,
+                "r": 4,
+                "b": 3,
+                "opencl_acceleration": false
+            }
+        }
+    ]
+}
