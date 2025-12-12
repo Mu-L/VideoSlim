@@ -1,6 +1,9 @@
 import threading
 
+from src.model import message
 from src.model.video import Task, TaskInfo
+from src.service.message import MessageService
+from src.service.store import StoreService
 from src.service.updater import UpdateService
 from src.service.video import VideoService
 
@@ -21,8 +24,21 @@ class Controller:
         """
         threading.Thread(
             target=UpdateService.check_for_updates,
-            daemon=True,
         ).start()
+
+    def close(self):
+        """
+        关闭应用程序
+
+        1. 停止所有视频处理任务
+        2. 清理临时文件
+        3. 发送退出消息通知视图关闭
+        4.  dump 配置到文件
+        """
+        StoreService.get_instance().dump()
+        MessageService.get_instance().send_message(message.ExitMessage())
+        VideoService.get_instance().stop_process()
+        VideoService.get_instance().clean_temp_files()
 
     def compression(
         self,
@@ -58,5 +74,4 @@ class Controller:
         threading.Thread(
             target=VideoService.process_task,
             args=(task,),
-            daemon=True,
         ).start()

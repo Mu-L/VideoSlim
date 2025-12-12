@@ -28,6 +28,8 @@ class VideoService:
 
     _instance: Optional["VideoService"] = None
 
+    running_process: list[subprocess.Popen] = []
+
     def __init__(self) -> None:
         if self._instance is not None:
             raise ValueError("VideoService 是单例类，不能重复实例化")
@@ -135,23 +137,33 @@ class VideoService:
         for index, command in enumerate(commands):
             logging.info(f"执行命令: {command}")
 
-            result = subprocess.run(
+            # 使用Popen创建子进程并添加到running_process列表
+            process = subprocess.Popen(
                 command,
                 creationflags=subprocess.CREATE_NO_WINDOW,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
             )
+            VideoService.running_process.append(process)
+
+            # 等待进程完成
+            stdout, stderr = process.communicate()
+
+            # 从running_process列表中移除已完成的进程
+            if process in VideoService.running_process:
+                VideoService.running_process.remove(process)
 
             # Log command output
-            if result.stdout:
-                logging.debug(f"command stdout: {result.stdout.strip()}")
-            if result.stderr:
-                logging.warning(f"command stderr: {result.stderr.strip()}")
+            if stdout:
+                logging.debug(f"command stdout: {stdout.strip()}")
+            if stderr:
+                logging.warning(f"command stderr: {stderr.strip()}")
 
             # Check return code
-            if result.returncode != 0:
-                logging.error(f"命令执行失败，退出码: {result.returncode}")
-                raise subprocess.CalledProcessError(result.returncode, command)
+            if process.returncode != 0:
+                logging.error(f"命令执行失败，退出码: {process.returncode}")
+                raise subprocess.CalledProcessError(process.returncode, command)
 
             MessageService.get_instance().send_message(
                 CompressionCurrentProgressMessage(
@@ -247,3 +259,32 @@ class VideoService:
                     os.remove(temp_file)
                 except Exception as e:
                     logging.warning(f"删除临时文件 {temp_file} 失败: {e}")
+
+    @staticmethod
+    def stop_process():
+        """
+        停止当前正在运行的视频处理进程
+
+        该方法会终止running_process中存储的子进程，
+        并等待其退出。如果进程未运行或已退出，
+        则不执行任何操作。
+
+        Returns:
+            None
+        """
+        for process in VideoService.running_process:
+            process.terminate()
+            process.wait(timeout=5)
+            if process.returncode is None:
+                process.kill()
+        VideoService.running_process.clear()
+
+    @staticmethod
+    def is_processing() -> bool:
+        """
+        检查是否有正在运行的视频处理进程
+
+        Returns:
+            bool: 如果有正在运行的进程则返回True，否则返回False
+        """
+        return len(VideoService.running_process) > 0

@@ -11,7 +11,7 @@ from src import meta
 from src.controller import Controller
 from src.model import message
 from src.service.message import MessageService
-from src.service.store import StoreService
+from src.service.video import VideoService
 
 
 class View:
@@ -176,8 +176,15 @@ class View:
         当用户点击关闭按钮时，会调用此方法。
         该方法会发送一个退出消息到消息队列，通知其他组件应用程序正在关闭。
         """
-        StoreService.get_instance().dump()
-        MessageService.get_instance().send_message(message.ExitMessage())
+        # 如果有正在处理的任务，提示用户确认是否继续
+        if VideoService.get_instance().is_processing():
+            response = messagebox.askyesno(
+                "确认", "当前有正在处理的任务，是否关闭程序？"
+            )
+            if not response:
+                return
+
+        self.controller.close()
 
     def _clear_file_list(self):
         """
