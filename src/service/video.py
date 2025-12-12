@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import sys
 from typing import Optional
 
 from pymediainfo import MediaInfo
@@ -91,6 +92,18 @@ class VideoService:
 
         commands = []
 
+        # Get tool path - handle both packaged and development environments
+        def get_tool_path(tool_name):
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            if hasattr(sys, "_MEIPASS"):
+                # Running in a bundled environment
+                return os.path.join(sys._MEIPASS, "tools", tool_name)  # type: ignore[attr-defined]
+            else:
+                # Running in a development environment
+                return os.path.join("./tools", tool_name)
+
+        ffmpeg_path = get_tool_path("ffmpeg.exe")
+
         # Handle video rotation if needed
         pre_temp: Optional[str] = None
         if (
@@ -99,7 +112,7 @@ class VideoService:
         ):
             logging.info("视频元信息含有旋转，进行预处理")
             pre_temp = "./pre_temp.mp4"
-            commands.append(f'./tools/ffmpeg.exe -i "{file.file_path}" "{pre_temp}"')
+            commands.append(f'"{ffmpeg_path}" -i "{file.file_path}" "{pre_temp}"')
 
         # Generate compression commands based on audio presence
         has_audio = len(media_info.audio_tracks) > 0 and not delete_audio
@@ -125,7 +138,7 @@ class VideoService:
         if has_audio:
             # Process with audio using single ffmpeg command
             commands.append(
-                f'./tools/ffmpeg.exe -nostats -i "{input_file}" '
+                f'"{ffmpeg_path}" -nostats -i "{input_file}" '
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
@@ -139,7 +152,7 @@ class VideoService:
         else:
             # Process without audio using single ffmpeg command
             commands.append(
-                f'./tools/ffmpeg.exe -nostats -i "{input_file}" '
+                f'"{ffmpeg_path}" -nostats -i "{input_file}" '
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
