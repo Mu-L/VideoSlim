@@ -26,12 +26,12 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo 构建成功！可执行文件位于：%DIST_DIR%\VideoSlim.exe
+echo build success! executable file is located at: %DIST_DIR%\VideoSlim.exe
 
 REM 复制配置文件和其他必要文件到输出目录
 copy /Y config.json %DIST_DIR% 2>nul
 
 REM 清理临时文件（可选）
-REM rmdir /S /Q %BUILD_TMP_DIR%
+REM rmdir /S /Q %BUILD_TMP_DIBuild 
 
 pause
