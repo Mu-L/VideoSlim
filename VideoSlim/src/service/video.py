@@ -92,6 +92,7 @@ class VideoService:
         commands = []
 
         # Handle video rotation if needed
+        pre_temp: Optional[str] = None
         if (
             hasattr(media_info.video_tracks[0], "other_rotation")
             and media_info.video_tracks[0].other_rotation
@@ -115,7 +116,7 @@ class VideoService:
                     f"./tools/x264_64-8bit.exe --crf {config.x264.crf} --preset {config.x264.preset} "
                     f"-I {config.x264.I} -r {config.x264.r} -b {config.x264.b} "
                     f"--me umh -i 1 --scenecut 60 -f 1:1 --qcomp 0.5 --psy-rd 0.3:0 "
-                    f'--aq-mode 2 --aq-strength 0.8 -o "./old_vtemp.mp4" "{file.file_path}"'
+                    f'--aq-mode 2 --aq-strength 0.8 -o "./old_vtemp.mp4" "{pre_temp if pre_temp else file.file_path}"'
                     + (" --opencl" if config.x264.opencl_acceleration else ""),
                     # Mux video and audio
                     f'./tools/mp4box.exe -add "./old_vtemp.mp4#trackID=1:name=" '
