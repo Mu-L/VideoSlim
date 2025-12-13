@@ -231,9 +231,9 @@ FFmpeg 和其他第三方工具按其各自许可证使用与分发。
 
 ## 致谢
 - **FFmpeg**: 强大的音视频处理工具
-- **MediaInfo**: 专业的媒体信息分析库
-- **x264**: 优秀的 H.264 视频编码器
 
 —— 祝使用愉快 🎬
+
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=mainite/VideoSlim&type=date&legend=top-left)](https://www.star-history.com/#mainite/VideoSlim&type=date&legend=top-left)
