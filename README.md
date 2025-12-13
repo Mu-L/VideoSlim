@@ -107,7 +107,7 @@
    uv pip install pyinstaller
    ```
 
-### 自动化构建（推荐）
+### 构建
 项目提供了 `scripts/build.cmd` 自动化构建脚本，可一键生成单文件可执行程序：
 
 ```bash
@@ -123,9 +123,28 @@ scripts/build.cmd
 
 构建完成后，可执行文件将位于：`output/dist/VideoSlim.exe`
 
-### 手动构建选项
+## 开发指南
 
-建议使用 pyinstaller 进行构建.
+### 代码格式化
+项目使用 [ruff](https://github.com/astral-sh/ruff) 作为代码格式化器，遵循默认的格式化规则。
+
+#### 格式化代码
+```bash
+uv run ruff format
+```
+
+#### 检查代码格式
+```bash
+uv run ruff check
+```
+
+### 开发工作流
+1. 创建并激活虚拟环境
+2. 安装依赖（包括开发依赖）
+3. 编写代码
+4. 使用 ruff 格式化代码
+5. 测试功能
+6. 提交代码
 
 
 ## 目录结构
