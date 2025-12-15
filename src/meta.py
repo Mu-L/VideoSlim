@@ -1,5 +1,4 @@
-import os
-import sys
+from src import utils
 
 """
 VideoSlim 应用程序常量定义
@@ -25,12 +24,13 @@ TEMP_FILES = ["./pre_temp.mp4"]
 
 
 def get_ffmpeg_path() -> str:
-    if hasattr(sys, "_MEIPASS"):
-        # Running in a bundled environment
-        return os.path.join(sys._MEIPASS, "tools", "ffmpeg.exe")  # type: ignore[attr-defined]
-    else:
-        # Running in a development environment
-        return os.path.join("./tools", "ffmpeg.exe")
+    """
+    获取FFmpeg可执行文件的路径
+
+    Returns:
+        str: FFmpeg可执行文件的路径
+    """
+    return utils.get_path("./tools/ffmpeg.exe")
 
 
 FFMPEG_PATH = get_ffmpeg_path()

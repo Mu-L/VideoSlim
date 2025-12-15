@@ -7,7 +7,7 @@ from tkinter import END, NE, TOP, BooleanVar, StringVar, W, messagebox
 
 import windnd
 
-from src import meta
+from src import meta, utils
 from src.controller import Controller
 from src.model import message
 from src.service.message import MessageService
@@ -55,7 +55,7 @@ class View:
         self.root.resizable(width=False, height=False)
 
         # Set icon if available
-        icon_path = os.path.join(os.getcwd(), "./tools/icon.ico")
+        icon_path = utils.get_path("./tools/icon.ico")
         if os.path.exists(icon_path):
             self.root.iconbitmap(icon_path)
 

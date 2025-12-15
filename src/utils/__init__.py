@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from functools import wraps
 
 
@@ -65,3 +66,18 @@ def timer(f):
         return result
 
     return wrapper
+
+
+def get_path(path: str):
+    """获取文件路径，即便是在打包后的环境中也能正常工作
+
+    Args:
+        path (str): 文件路径，支持相对路径和绝对路径
+    """
+
+    if hasattr(sys, "_MEIPASS"):
+        # Running in a bundled environment
+        return os.path.join(sys._MEIPASS, path)  # type: ignore[attr-defined]
+    else:
+        # Running in a development environment
+        return os.path.join(os.getcwd(), path)
