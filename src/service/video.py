@@ -102,7 +102,7 @@ class VideoService:
                 + "-c:a aac -b:a 128k "
                 + "-movflags faststart "
                 + ("-hwaccel auto " if config.x264.opencl_acceleration else "")
-                + f'"{output_path}"'
+                + f'-map 0: "{output_path}"'
             )
         else:
             # Process without audio using single ffmpeg command
@@ -116,7 +116,7 @@ class VideoService:
                 + "-an "
                 + "-movflags faststart "
                 + ("-hwaccel auto " if config.x264.opencl_acceleration else "")
-                + f'"{output_path}"'
+                + f'-map 0: "{output_path}"'
             )
 
         # Execute commands
