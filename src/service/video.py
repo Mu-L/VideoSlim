@@ -239,7 +239,7 @@ class VideoService:
             # Notify start of processing
             message_service.send_message(
                 CompressionTotalProgressMessage(
-                    index,
+                    index - 1,
                     task.files_num,
                     video_file.file_path,
                 )
