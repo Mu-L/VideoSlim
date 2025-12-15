@@ -24,6 +24,7 @@ class Controller:
         """
         threading.Thread(
             target=UpdateService.check_for_updates,
+            daemon=True,
         ).start()
 
     def close(self):
