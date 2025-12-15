@@ -100,7 +100,7 @@
 3. **创建虚拟环境并安装依赖**: 
    ```bash
    uv venv
-   uv sync
+   uv sync --extra dev
    ```
 4. **安装构建工具**: 
    ```bash
@@ -113,6 +113,9 @@
 ```bash
 # 在项目根目录运行
 scripts/build.cmd
+
+# 或者用 uv 运行
+uv run scripts/build.cmd
 ```
 
 构建过程会自动完成以下操作：
