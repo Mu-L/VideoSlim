@@ -194,3 +194,30 @@ class Task:
             int: 任务中的总文件数
         """
         return len(self.video_sequence)
+
+
+def resolve_time_str(time_str: str) -> float:
+    """
+    解析时间字符串为秒数
+
+    Args:
+        time_str: 时间字符串，格式为 "HH:MM:SS.xxx"
+
+    Returns:
+        float: 时间字符串对应的秒数
+    """
+    h, m, s = map(float, time_str.split(":"))
+    return h * 3600 + m * 60 + s
+
+
+def is_progress_line(line: str) -> bool:
+    """
+    判断是否为进度行
+
+    Args:
+        line: 输入行字符串
+
+    Returns:
+        bool: 如果是进度行，则返回True
+    """
+    return "elapsed" in line

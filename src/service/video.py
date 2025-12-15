@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import time
 from typing import Optional
 
 from src import meta
@@ -11,7 +12,7 @@ from src.model.message import (
     CompressionStartMessage,
     CompressionTotalProgressMessage,
 )
-from src.model.video import Task, VideoFile
+from src.model.video import Task, VideoFile, is_progress_line, resolve_time_str
 from src.service.config import ConfigService
 from src.service.message import MessageService
 from src.utils import timer
@@ -92,7 +93,7 @@ class VideoService:
         if not delete_audio:
             # Process with audio using single ffmpeg command
             commands.append(
-                f'"{ffmpeg_path}" -y -nostats -i "{input_file}" '
+                f'"{ffmpeg_path}" -y -i "{input_file}" '
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
@@ -106,7 +107,7 @@ class VideoService:
         else:
             # Process without audio using single ffmpeg command
             commands.append(
-                f'"{ffmpeg_path}" -y -nostats -i "{input_file}" '
+                f'"{ffmpeg_path}" -y -i "{input_file}" '
                 + f"-c:v libx264 -crf {config.x264.crf} -preset {preset} "
                 + f"-keyint_min {config.x264.I} -g {config.x264.I} "
                 + f"-refs {config.x264.r} -bf {config.x264.b} "
@@ -128,12 +129,54 @@ class VideoService:
                 command,
                 creationflags=subprocess.CREATE_NO_WINDOW,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # 合并stdout和stderr到stdout
                 text=True,
+                bufsize=1,
+                universal_newlines=True,
             )
             VideoService.running_process.append(process)
 
-            # 等待进程完成
+            # 等待进程完成，同时解析进度
+            cur_time: float = -0.01  # 当前视频播放时间
+            total_time: float = -1  # 视频总时长
+            update_time = time.time()  # 上次更新进度的时间
+            while process.poll() is None:
+                line = ""
+                try:
+                    stdout = process.stdout
+                    if not stdout:
+                        continue
+
+                    line = stdout.readline()
+
+                    if not is_progress_line(line):
+                        if total_time == -1 and "Duration" in line:
+                            # 解析视频总时长
+                            total_time = resolve_time_str(
+                                line.split("Duration: ")[1].split(",")[0]
+                            )
+                            logging.debug(f"视频总时长: {total_time}")
+
+                        logging.debug(f"{line.strip()}")
+                        continue
+
+                    # 解析当前播放时间
+                    cur_time = resolve_time_str(line.split("time=")[1].split(" ")[0])
+
+                    # 发送进度
+                    if update_time < time.time() - 1:
+                        update_time = time.time()
+                        MessageService.get_instance().send_message(
+                            CompressionCurrentProgressMessage(
+                                file_name=file.file_path,
+                                current=cur_time,
+                                total=total_time,
+                            )
+                        )
+
+                except Exception as e:
+                    logging.error(f"读取 stdout 时出错:  {e} 输出: {line.strip()}")
+
             stdout, stderr = process.communicate()
 
             # 从running_process列表中移除已完成的进程
@@ -150,14 +193,6 @@ class VideoService:
             if process.returncode != 0:
                 logging.error(f"命令执行失败，退出码: {process.returncode}")
                 raise subprocess.CalledProcessError(process.returncode, command)
-
-            MessageService.get_instance().send_message(
-                CompressionCurrentProgressMessage(
-                    file_name=file.file_path,
-                    current=index + 1,
-                    total=total_commands,
-                )
-            )
 
         # Delete source if requested
         if delete_source and os.path.exists(output_path):

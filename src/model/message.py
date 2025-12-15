@@ -1,5 +1,7 @@
 from abc import ABC
 
+type ProgressType = float | int
+
 
 class IMessage(ABC):
     """
@@ -161,7 +163,9 @@ class CompressionCurrentProgressMessage(IMessage):
     当前文件压缩进度
     """
 
-    def __init__(self, file_name: str, current: int, total: int) -> None:
+    def __init__(
+        self, file_name: str, current: ProgressType, total: ProgressType
+    ) -> None:
         self.file_name = file_name
         self.current = current
         self.total = total
