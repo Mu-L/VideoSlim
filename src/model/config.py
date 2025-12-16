@@ -45,6 +45,7 @@ class ConfigModel(BaseModel):
     """
 
     name: str = Field(default="default", description="配置名称，用于标识不同的压缩配置")
+    # TODO: 把编码器抽象出来成为接口，后面支持x265
     x264: X264ConfigModel = Field(
         default_factory=X264ConfigModel, description="X264编码器配置参数"
     )
