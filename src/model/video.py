@@ -206,6 +206,9 @@ def resolve_time_str(time_str: str) -> float:
     Returns:
         float: 时间字符串对应的秒数
     """
+    if time_str == "N/A":
+        return 0.0
+
     h, m, s = map(float, time_str.split(":"))
     return h * 3600 + m * 60 + s
 
