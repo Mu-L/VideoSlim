@@ -237,4 +237,4 @@ FFmpeg 和其他第三方工具按其各自许可证使用与分发。
 
 —— 祝使用愉快 🎬
 
-[![Star History Chart](https://api.star-history.com/svg?repos=mainite/VideoSlim&type=date&legend=top-left)]
+![Star History Chart](https://api.star-history.com/svg?repos=mainite/VideoSlim&type=date&legend=top-left)
