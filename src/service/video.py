@@ -1,9 +1,8 @@
 import logging
 import os
 import subprocess
-import threading
 import time
-from typing import List, Optional
+from typing import Optional
 
 from src import meta
 from src.model.message import (
@@ -16,7 +15,7 @@ from src.model.message import (
 from src.model.video import Task, VideoFile, is_progress_line, resolve_time_str
 from src.service.config import ConfigService
 from src.service.message import MessageService
-from src.utils import get_cpu_count, timer
+from src.utils import timer
 
 
 class VideoService:
@@ -31,14 +30,6 @@ class VideoService:
     _instance: Optional["VideoService"] = None
 
     running_process: list[subprocess.Popen] = []
-
-    # 最大并发线程数
-    MAX_THREADS = int(get_cpu_count() * 0.7)  # 使用70%的CPU核心数
-
-    # 线程安全的计数器
-    processed_count = 0
-    total_count = 0
-    lock = threading.Lock()
 
     def __init__(self) -> None:
         if self._instance is not None:
@@ -178,7 +169,6 @@ class VideoService:
                     # 发送进度
                     if update_time < time.time() - 1:
                         update_time = time.time()
-                        # TODO: UI 界面没有兼容多线程
                         MessageService.get_instance().send_message(
                             CompressionCurrentProgressMessage(
                                 file_name=file.file_path,
@@ -212,78 +202,26 @@ class VideoService:
             logging.debug(f"存在输出文件：{output_path}，删除源文件: {file.file_path}")
             os.remove(file.file_path)
 
-    @staticmethod
-    def _process_file_in_thread(
-        video_file: VideoFile,
-        config_name: str,
-        delete_audio: bool,
-        delete_source: bool,
-        message_service: MessageService,
-    ):
-        """
-        在单独的线程中处理单个视频文件
-
-        Args:
-            video_file: 视频文件对象
-            config_name: 压缩配置文件名
-            delete_audio: 是否删除音频轨道
-            delete_source: 是否删除源文件
-            message_service: 消息服务实例
-        """
-        try:
-            VideoService.clean_temp_files()
-            VideoService.process_single_file(
-                file=video_file,
-                config_name=config_name,
-                delete_audio=delete_audio,
-                delete_source=delete_source,
-            )
-        except Exception as e:
-            logging.error(f"处理文件 {video_file.file_path} 失败: {e}")
-            message_service.send_message(
-                CompressionErrorMessage(
-                    "错误", f"处理文件 {video_file.file_path} 失败: {e}"
-                )
-            )
-        finally:
-            VideoService.clean_temp_files()
-            # 更新已处理文件计数并发送进度
-            with VideoService.lock:
-                VideoService.processed_count += 1
-                processed = VideoService.processed_count
-                total = VideoService.total_count
-
-            # 发送总进度更新
-            message_service.send_message(
-                CompressionTotalProgressMessage(
-                    processed,
-                    total,
-                    video_file.file_path,
-                )
-            )
-
     @timer
     @staticmethod
     def process_task(task: Task):
         """
-        处理视频压缩任务，支持多线程批量处理多个视频文件
+        处理视频压缩任务，支持批量处理多个视频文件
 
         Args:
             task: 视频处理任务对象，包含待处理文件列表和处理配置
 
         该方法会：
         1. 发送任务开始消息
-        2. 使用多线程并发处理任务中的视频文件
+        2. 遍历处理任务中的每个视频文件
         3. 发送当前文件处理进度消息
-        4. 调用_process_file_in_thread在单独线程中处理单个文件
+        4. 调用process_single_file处理单个文件
         5. 处理可能出现的异常并发送错误消息
-        6. 等待所有线程完成后发送任务完成消息
+        6. 发送任务完成消息
         """
         message_service = MessageService.get_instance()
 
-        logging.info(
-            f"process task: {task.info} with {VideoService.MAX_THREADS} threads"
-        )
+        logging.info(f"process task: {task.info}")
 
         logging.debug(f"process task sequence: {task.video_sequence}")
 
@@ -293,53 +231,40 @@ class VideoService:
             )
             return
 
-        # 初始化线程安全的计数器
-        with VideoService.lock:
-            VideoService.processed_count = 0
-            VideoService.total_count = task.files_num
-
-        # 发送任务开始消息
         message_service.send_message(CompressionStartMessage(task.files_num))
 
-        # 创建线程列表
-        threads: List[threading.Thread] = []
-
-        # 发送初始进度消息
-        message_service.send_message(
-            CompressionTotalProgressMessage(
-                0,
-                task.files_num,
-                "准备开始处理",
-            )
-        )
-
-        # 处理每个文件，控制并发线程数
+        # Process each file
         for index, video_file in enumerate(task.video_sequence, 1):
             logging.debug(
-                f"准备处理文件: {video_file.file_path}, index: {index}, total: {task.files_num}"
+                f"process file: {video_file.file_path}, index: {index}, total: {task.files_num}"
             )
 
-            # 创建并启动线程
-            thread = threading.Thread(
-                target=VideoService._process_file_in_thread,
-                args=(
-                    video_file,
-                    task.info.process_config_name,
-                    task.info.delete_audio,
-                    task.info.delete_source,
-                    message_service,
-                ),
+            # Notify start of processing
+            message_service.send_message(
+                CompressionTotalProgressMessage(
+                    index - 1,
+                    task.files_num,
+                    video_file.file_path,
+                )
             )
-            threads.append(thread)
-            thread.start()
 
-            # 限制并发线程数
-            while len([t for t in threads if t.is_alive()]) >= VideoService.MAX_THREADS:
-                time.sleep(0.1)
-
-        # 等待所有线程完成
-        for thread in threads:
-            thread.join()
+            try:
+                VideoService.clean_temp_files()
+                VideoService.process_single_file(
+                    file=video_file,
+                    config_name=task.info.process_config_name,
+                    delete_audio=task.info.delete_audio,
+                    delete_source=task.info.delete_source,
+                )
+            except Exception as e:
+                logging.error(f"处理文件 {video_file.file_path} 失败: {e}")
+                message_service.send_message(
+                    CompressionErrorMessage(
+                        "错误", f"处理文件 {video_file.file_path} 失败: {e}"
+                    )
+                )
+            finally:
+                VideoService.clean_temp_files()
 
         # Signal completion
         message_service.send_message(

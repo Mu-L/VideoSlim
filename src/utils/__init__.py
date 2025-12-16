@@ -81,14 +81,3 @@ def get_path(path: str):
     else:
         # Running in a development environment
         return os.path.join(os.getcwd(), path)
-
-
-def get_cpu_count() -> int:
-    """获取当前系统的CPU核心数
-
-    Returns:
-        int: CPU核心数
-    """
-    import multiprocessing
-
-    return multiprocessing.cpu_count()
