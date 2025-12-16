@@ -120,7 +120,7 @@ class VideoService:
             )
 
         # Execute commands
-        total_commands = len(commands)
+        # total_commands = len(commands)
         for index, command in enumerate(commands):
             logging.info(f"执行命令: {command}")
 
