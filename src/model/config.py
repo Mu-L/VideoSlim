@@ -49,6 +49,7 @@ class ConfigModel(BaseModel):
     x264: X264ConfigModel = Field(
         default_factory=X264ConfigModel, description="X264编码器配置参数"
     )
+    # TODO: 增加线程数的配置
 
 
 class ConfigsModel(BaseModel):
