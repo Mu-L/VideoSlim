@@ -157,6 +157,9 @@ class VideoService:
                             )
                             logging.debug(f"视频总时长: {total_time}")
 
+                        if line.strip() == "":
+                            continue
+
                         logging.debug(f"{line.strip()}")
                         continue
 
