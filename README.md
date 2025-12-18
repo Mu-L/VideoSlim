@@ -1,7 +1,7 @@
 
 
 <h1 align="center" style="font-size:50px;font-weight:bold">VideoSlim</h1>
-<p align="center">简洁易用的 Windows 视频压缩工具（x264 + NeroAAC + MP4Box）</p>
+<p align="center">简洁易用的 Windows 视频压缩工具</p>
 
 <p align="center">
   <img src="./img/interface.jpg" width="520" style="display:block;margin:auto;" />
@@ -10,135 +10,231 @@
   <br/>
   <a href="https://github.com/mainite/VideoSlim">GitHub</a>
   ·
-  <a href="#%E4%B8%8B%E8%BD%BD%E4%B8%8E%E5%AE%89%E8%A3%85">下载与安装</a>
+  <a href="#快速使用">快速使用</a>
   ·
-  <a href="#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8">快速使用</a>
+  <a href="#配置">配置</a>
   ·
-  <a href="#%E9%85%8D%E7%BD%AEconfigjson">配置</a>
+  <a href="#构建指南">构建指南</a>
 </p>
 
 ---
 
+> [!WARNING]
+> 以下内容有不少 AI 生成，所以如果发现 REAME.md 写错了也正常。
+> 
+> 欢迎为项目提供 PR ！
+
 ## 功能特性
-- **拖拽即用**: 将文件或文件夹拖入窗口，一键开始压缩
-- **批量处理与递归扫描**: 可递归扫描子文件夹中的视频
-- **多配置切换**: `config.json` 中可定义多套 x264 参数方案
-- **可选删除音频轨道** 与 **完成后删除源文件**
-- **自动修正旋转信息**: 若视频存在旋转元数据，自动预处理
-- **日志与版本检查**: 生成 `log.txt`，并检查 GitHub 新版本
+- **一键压缩**: 拖拽文件/文件夹到窗口，选择配置即可开始压缩
+- **智能处理**: 自动修正视频旋转元数据，优化输出质量
+- **多配置方案**: 内置默认、快速和高质量三种配置，支持自定义扩展
+- **批量处理**: 支持递归扫描子文件夹，批量处理多个视频文件
+- **高级选项**:
+  - 可选择删除音频轨道以进一步减小文件体积
+  - 支持压缩完成后自动删除源文件
+  - 可选OpenCL GPU加速，提升编码速度
+- **日志记录**: 详细的操作日志，便于调试和问题排查
+- **绿色便携**: 单文件可执行程序，无需安装，包含所有必要依赖
 
-## 支持平台与依赖
-- 操作系统: Windows 10/11（内置二进制工具，Windows 专用）
-- Python: 3.9+（含 `tkinter`）
-- Python 依赖: `requests`, `pymediainfo`, `windnd`
-- 外部二进制已内置于 `VideoSlim/tools/`:
-  - `ffmpeg.exe`, `x264_64-8bit.exe`, `neroAacEnc.exe`, `MP4Box.exe` 及必要 DLL
-
-> 提示: `pymediainfo` 依赖 MediaInfo 库。一般可直接使用；若解析失败，请安装 MediaInfo（如桌面版或对应 DLL）。
-
-## 下载与安装
-1. 克隆或下载本仓库。
-2. 安装 Python 依赖（推荐虚拟环境）：
-
-```bash
-pip install requests pymediainfo windnd
-```
-
-3. 直接运行应用：
-
-```bash
-python VideoSlim/main.py
-```
-
-首次运行会在 `VideoSlim/config.json` 生成默认配置。
+## 技术栈
+- **Python 3.12+**: 主要开发语言
+- **Tkinter**: 图形用户界面
+- **FFmpeg**: 视频处理核心工具（已内置）
+- **x264**: H.264 视频编码器（通过FFmpeg调用）
+- **AAC**: 高级音频编码支持
+- **pymediainfo**: 专业媒体信息解析库
+- **windnd**: 实现拖拽功能
+- **PyInstaller**: 应用程序打包工具
 
 ## 快速使用
-1. 启动程序后，将视频文件或包含视频的文件夹拖入窗口。
-2. 选择配置（右下拉框）。
-3. 视需要勾选：
-   - 递归(至最深深度)子文件夹里面的视频
-   - 完成后删除旧文件
-   - 删除音频轨道
-4. 点击“压缩”。
+**下载可执行文件**: 从发布页面下载 `VideoSlim.exe`（已包含所有依赖）
 
-处理完成后，将在源文件同目录生成 `*_x264.mp4` 文件。
 
-## 配置（`config.json`）
-应用启动时读取 `VideoSlim/config.json`。若不存在，将按模板创建，结构示例：
+### 使用步骤
+1. 将视频文件或包含视频的文件夹拖入窗口
+2. 从下拉菜单选择合适的配置方案
+3. 根据需要勾选高级选项：
+   - ✅ 递归：同时处理子文件夹中的视频
+   - ✅ 删除源文件：压缩完成后删除原始视频
+   - ✅ 删除音频：移除视频中的音频轨道
+4. 点击"压缩"按钮开始处理
 
-```json
-{
-  "comment": "Configuration file for VideoSlim. See README.md for parameter descriptions.",
-  "configs": {
-    "default": {
-      "x264": { "crf": 23.5, "preset": 8, "I": 600, "r": 4, "b": 3, "opencl_acceleration": false }
-    },
-    "default_gpu": {
-      "x264": { "crf": 23.5, "preset": 8, "I": 600, "r": 4, "b": 3, "opencl_acceleration": true }
-    },
-    "custom_template": {
-      "x264": { "crf": 30, "preset": 8, "I": 600, "r": 4, "b": 3, "opencl_acceleration": false }
-    }
-  }
-}
+**输出结果**: 处理完成后，将在源文件同目录生成 `*_x264.mp4` 文件。
+
+## 配置
+应用启动时读取 `config.json`。若不存在，将自动生成默认配置
+
+
+### 参数说明
+
+#### 视频编码参数
+
+| 参数名                  | 取值范围       | 默认值 | 说明                                                                                                                   |
+| ----------------------- | -------------- | ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **crf**                 | 0–51           | 23.5   | 质量控制参数，值越小质量越高（体积越大）<br>推荐范围：18–28                                                            |
+| **preset**              | 编码预设字符串 | medium | 编码速度/压缩效率平衡<br>可选值：ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo |
+| **I**                   | 正整数         | 600    | 关键帧间隔（GOP），控制视频的时间结构                                                                                  |
+| **r**                   | 正整数         | 4      | 参考帧数量，影响压缩效率和编码速度                                                                                     |
+| **b**                   | 正整数         | 3      | B 帧数量，提升压缩效率但增加编码复杂度                                                                                 |
+| **opencl_acceleration** | true/false     | false  | 是否开启 OpenCL GPU 加速<br>开启后可大幅提升编码速度（需硬件支持）                                                     |
+
+#### 配置建议
+- **日常使用**: 推荐使用 "default" 配置（crf=23.5, preset=medium）
+- **快速处理**: 选择 "fast" 配置，适合大量视频的快速压缩
+- **高质量需求**: 使用 "high_quality" 配置，提供接近原画质的压缩效果
+- **自定义配置**: 可在 `configs` 中添加新的配置方案，命名任意
+
+## 构建指南
+
+### 环境准备
+1. **安装 Python**: 确保安装了 Python 3.12 或更高版本
+2. **克隆项目并进入项目根目录**: 
+   ```bash
+   git clone https://github.com/mainite/VideoSlim.git
+   cd VideoSlim
+   ```
+2.5 **安装 uv**: 
+   ```bash
+   pipx install uv
+   ```
+3. **创建虚拟环境并安装依赖**: 
+   ```bash
+   uv venv
+   uv sync --extra dev
+   ```
+4. **安装构建工具**: 
+   ```bash
+   uv pip install pyinstaller
+   ```
+
+### 构建
+项目提供了 `scripts/build.cmd` 自动化构建脚本，可一键生成单文件可执行程序：
+
+```bash
+# 在项目根目录运行
+scripts/build.cmd
+
+# 或者用 uv 运行
+uv run scripts/build.cmd
 ```
 
-### 参数说明（x264）
-- **crf (0–51, 越小越清晰)**: 目标质量控制，常用 18–28。23.5 为默认。
-- **preset (0–9)**: 编码速度/压缩效率的平衡，数字越小越快（质量略差）。
-- **I**: 关键帧间隔（GOP）。示例为 600。
-- **r**: 参考帧数量（x264 的 `-r` 为 reference frames）。
-- **b**: B 帧数量（x264 的 `-b` 为 B-frames）。
-- **opencl_acceleration**: 是否尝试开启 OpenCL 加速（`--opencl`）。
+构建过程会自动完成以下操作：
+- 清理旧的构建文件
+- 配置 PyInstaller 打包参数
+- 添加必要的工具文件（ffmpeg.exe、icon.ico）
+- 生成单文件可执行程序
 
-> 注意: 本项目对 x264 的其他参数使用了一组固定且通用的配置（如 `--me umh --scenecut 60 --qcomp 0.5 --psy-rd 0.3:0 --aq-mode 2 --aq-strength 0.8` 等），只暴露了常用、可安全调整的项以简化使用。
+构建完成后，可执行文件将位于：`output/dist/VideoSlim.exe`
 
-## 工作流程概览
-- 若视频含旋转元信息，先用 `ffmpeg` 预处理为中间文件。
-- 若保留音频：
-  1. `ffmpeg` 提取 WAV（PCM 16-bit）
-  2. `neroAacEnc` 编为 AAC LC 128kbps
-  3. `x264` 压制视频流
-  4. `MP4Box` 混流为 MP4
-- 若删除音频：直接用 `x264` 输出 MP4。
+## 开发指南
 
-## 输出与临时文件
-- 输出命名: `原文件名_x264.mp4`
-- 临时文件（在每次处理前后清理）:
-  - `./pre_temp.mp4`, `./old_atemp.wav`, `./old_atemp.mp4`, `./old_vtemp.mp4`
-- 可选项：完成后删除旧文件（源文件）。
+### 代码格式化
+项目使用 [ruff](https://github.com/astral-sh/ruff) 作为代码格式化器，遵循默认的格式化规则。
 
-## 日志与更新
-- 日志: 程序运行会生成 `log.txt`（UTF-8）。
-- 更新: 启动后会检查 GitHub Release，若发现新版本会弹窗提示。
+#### 格式化代码
+```bash
+uv run ruff format
+```
 
-## 常见问题
-- 无法拖拽/窗口不响应：确认已安装 `windnd`，并以常规权限运行。
-- 无法解析媒体信息：安装/更新 MediaInfo；或确保视频文件未被占用。
-- 编码失败/报错窗口：查看 `log.txt` 获取具体命令与错误输出。
-- 过于模糊或体积过大：调整 `crf`（小=清晰=大体积；大=模糊=小体积）。
-- 编码过慢：提高 `preset` 数值或开启 `opencl_acceleration`（视硬件支持）。
+#### 检查代码格式
+```bash
+uv run ruff check
+```
+
+### 开发工作流
+1. 创建并激活虚拟环境
+2. 安装依赖（包括开发依赖）
+3. 编写代码
+4. 使用 ruff 格式化代码
+5. 测试功能
+6. 提交代码
+
 
 ## 目录结构
 ```
 VideoSlim/
-  main.py                # 启动入口（Tkinter GUI）
-  config.json            # 配置文件（首次运行自动生成）
-  src/
-    view.py              # UI 与交互
-    controller.py        # 配置读取、任务调度
-    logic.py             # 实际处理流程与子进程命令
-    config.py            # 配置模型与默认值
-    message.py           # UI 与后台之间的消息类型
-  tools/                 # 内置二进制（ffmpeg / x264 / neroAacEnc / MP4Box ...）
-img/                     # 截图
+├── main.py                # 应用程序启动入口
+├── config.json            # 配置文件（首次运行自动生成）
+├── pyproject.toml         # Python 项目配置
+├── README.md              # 项目文档
+├── LICENSE                # 许可证文件
+├── src/                   # 源代码主目录
+│   ├── controller.py      # MVC 控制器层
+│   ├── view.py            # MVC 视图层
+│   ├── meta.py            # 应用常量和版本定义
+│   ├── service/           # 核心服务模块
+│   │   ├── video.py       # 视频压缩处理服务
+│   │   ├── config.py      # 配置管理服务
+│   │   ├── message.py     # 消息通信服务
+│   │   └── updater.py     # 更新检查服务
+│   ├── model/             # 数据模型定义
+│   └── utils/             # 工具函数库
+├── tools/                 # 内置工具集
+│   ├── ffmpeg.exe         # FFmpeg 视频处理引擎
+│   ├── icon.ico           # 应用程序图标
+│   └── LICENSE            # 第三方工具许可证
+├── img/                   # 文档截图和资源
+├── scripts/               # 辅助脚本
+│   └── build.cmd          # 自动化构建脚本
+└── output/                # 构建输出目录
 ```
 
+## 工作原理
+
+### 核心处理流程
+
+```
+[输入视频] → [媒体信息解析] → [旋转修正（可选）] → [视频编码] → [音频处理] → [输出文件]
+```
+
+1. **媒体信息解析**
+   - 使用 pymediainfo 库分析视频文件的详细信息
+   - 检测视频编码、分辨率、帧率、时长等参数
+   - 判断是否包含音频轨道和旋转元数据
+
+2. **旋转修正预处理**
+   - 检测视频的旋转元数据（如手机拍摄的视频）
+   - 如果需要，使用 FFmpeg 进行旋转修正，生成临时文件
+
+3. **视频编码压缩**
+   - 核心使用 FFmpeg 的 libx264 编码器
+   - 根据配置参数（crf、preset、参考帧等）进行高质量压缩
+   - 支持 OpenCL GPU 加速，提升编码效率
+
+4. **音频处理**
+   - 根据用户选择保留或删除音频轨道
+   - 保留时使用 AAC 编码，确保音频质量
+
+5. **输出文件**
+   - 生成 MP4 格式的压缩视频
+   - 文件名格式：`原始文件名_x264.mp4`
+   - 自动清理临时文件
+
+### 技术实现亮点
+- **单命令处理**: 使用单个 FFmpeg 命令完成所有处理，减少文件 I/O 开销
+- **智能路径处理**: 自动适配开发和打包环境的工具路径
+- **异常处理**: 完善的错误捕获和日志记录，确保程序稳定性
+- **性能优化**: 合理的线程管理和资源利用
+
+## 日志与调试
+- 程序运行时会生成 `log.txt` 文件
+- 日志包含详细的命令执行信息和错误信息
+- 如遇到问题，可查看日志文件进行调试
+
+## 常见问题
+- **无法拖拽/窗口不响应**: 确认已安装所有依赖，并以常规权限运行
+- **无法解析媒体信息**: 确保视频文件未被占用，或尝试安装最新版本的 MediaInfo
+- **编码失败**: 查看 `log.txt` 获取具体错误信息
+- **质量不满意**: 调整 `crf` 参数（值越小质量越高）
+- **编码过慢**: 提高 `preset` 参数值（如从 slow 改为 medium 或 fast）
+
 ## 许可证
-本项目采用开源许可证，详见 `LICENSE`。第三方工具按其各自许可证使用与分发。
+本项目采用开源许可证，详见 `LICENSE` 文件。
+FFmpeg 和其他第三方工具按其各自许可证使用与分发。
 
 ## 致谢
-- x264, FFmpeg, MP4Box (GPAC), NeroAAC
-- MediaInfo / pymediainfo
+- **FFmpeg**: 强大的音视频处理工具
 
 —— 祝使用愉快 🎬
+
+![Star History Chart](https://api.star-history.com/svg?repos=mainite/VideoSlim&type=date&legend=top-left)

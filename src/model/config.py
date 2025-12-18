@@ -1,0 +1,63 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+type X264Preset = Literal[
+    "ultrafast",
+    "superfast",
+    "veryfast",
+    "faster",
+    "fast",
+    "medium",
+    "slow",
+    "slower",
+    "veryslow",
+]
+
+
+class X264ConfigModel(BaseModel):
+    """
+    X264编码器配置模型类，用于定义X264视频编码器的参数
+
+    该类封装了X264编码器的核心配置参数，包括质量控制、编码速度、关键帧间隔等。
+    """
+
+    crf: float = Field(
+        default=23.5, gt=0, lt=51, description="CRF值，范围在0-51之间，值越小质量越高"
+    )
+    preset: X264Preset = Field(
+        default="slower",
+        description="x264编码预设",
+    )
+    I: int = Field(default=600, description="关键帧间隔，影响视频的可编辑性和压缩率")
+    r: int = Field(default=4, description="B帧参考数，影响视频质量和编码速度")
+    b: int = Field(default=3, description="B帧数量，影响视频质量和压缩率")
+    opencl_acceleration: bool = Field(
+        default=False, description="是否启用OpenCL硬件加速"
+    )
+
+
+class ConfigModel(BaseModel):
+    """
+    视频压缩配置模型类，用于定义完整的视频压缩配置
+
+    该类包含配置名称和X264编码器配置，用于完整描述一组视频压缩参数。
+    """
+
+    name: str = Field(default="default", description="配置名称，用于标识不同的压缩配置")
+    # TODO: 把编码器抽象出来成为接口，后面支持x265
+    x264: X264ConfigModel = Field(
+        default_factory=X264ConfigModel, description="X264编码器配置参数"
+    )
+
+
+class ConfigsModel(BaseModel):
+    """
+    配置集合模型类，用于管理多个视频压缩配置
+
+    该类包含一个配置列表，用于存储和管理应用程序支持的所有视频压缩配置。
+    """
+
+    configs: list[ConfigModel] = Field(
+        default_factory=lambda: [ConfigModel()], description="视频压缩配置列表"
+    )
