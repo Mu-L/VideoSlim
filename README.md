@@ -8,7 +8,7 @@
   <br/>
   <img src="./img/readme.jpg" width="820" style="display:block;margin:auto;" />
   <br/>
-  <a href="https://github.com/mainite/VideoSlim">GitHub</a>
+  <a href="https://github.com/DongGuoZheng/VideoSlim">GitHub</a>
   ·
   <a href="#快速使用">快速使用</a>
   ·
@@ -237,4 +237,5 @@ FFmpeg 和其他第三方工具按其各自许可证使用与分发。
 
 —— 祝使用愉快 🎬
 
-![Star History Chart](https://api.star-history.com/svg?repos=mainite/VideoSlim&type=date&legend=top-left)
+![Star History Chart](https://api.star-history.com/svg?repos=DongGuoZheng/VideoSlim&type=date&legend=top-left)
+## Star History
