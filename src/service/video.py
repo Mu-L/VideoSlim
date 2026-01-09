@@ -301,12 +301,41 @@ class VideoService:
         Returns:
             None
         """
-        for process in VideoService.running_process:
-            process.terminate()
-            process.wait(timeout=5)
-            if process.returncode is None:
-                process.kill()
+        logging.info(
+            f"正在停止所有视频处理进程，共 {len(VideoService.running_process)} 个进程"
+        )
+
+        # 创建进程列表的副本，避免在遍历过程中修改原列表
+        processes_to_stop = list(VideoService.running_process)
+
+        for process in processes_to_stop:
+            try:
+                logging.debug(f"正在终止进程: {process.pid}")
+                process.terminate()
+
+                # 等待进程退出，最多等待5秒
+                logging.debug(f"等待进程 {process.pid} 退出")
+                process.wait(timeout=5)
+
+                if process.returncode is None:
+                    # 如果进程仍未退出，强制终止
+                    logging.warning(f"进程 {process.pid} 未在5秒内退出，正在强制终止")
+                    process.kill()
+                    # 再次等待确认进程退出
+                    try:
+                        process.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        logging.error(f"进程 {process.pid} 无法强制终止")
+                else:
+                    logging.debug(
+                        f"进程 {process.pid} 已退出，退出码: {process.returncode}"
+                    )
+            except Exception as e:
+                logging.error(f"处理进程 {process.pid} 时发生错误: {e}")
+
+        # 清空进程列表
         VideoService.running_process.clear()
+        logging.info("所有视频处理进程已停止")
 
     @staticmethod
     def is_processing() -> bool:
