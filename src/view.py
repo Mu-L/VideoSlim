@@ -73,7 +73,7 @@ class View:
         github_link.bind(
             "<Button-1>",
             lambda event: webbrowser.open_new_tab(
-                "https://github.com/mainite/VideoSlim"
+                "https://github.com/DongGuoZheng/VideoSlim"
             ),
         )
 

@@ -90,7 +90,7 @@
 1. **安装 Python**: 确保安装了 Python 3.12 或更高版本
 2. **克隆项目并进入项目根目录**: 
    ```bash
-   git clone https://github.com/mainite/VideoSlim.git
+   git clone https://github.com/DongGuoZheng/VideoSlim.git
    cd VideoSlim
    ```
 2.5 **安装 uv**: 
